@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/PC/Downloads/**)",
+      "Bash(awk '{ printf \"%d\\\\t%d\\\\t%s\\\\n\", NR, length\\($0\\), substr\\($0,1,120\\) }' \"C:\\\\Users\\\\PC\\\\Downloads\\\\AmeBet.html\")"
+    ]
+  }
+}
