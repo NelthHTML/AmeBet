@@ -1,24 +1,21 @@
 <!DOCTYPE html>
 <html><head>
-<!-- Résolution des modules : équivalent local de ce que faisait le
-     bundler avec des blob: URLs. React et le store sont servis depuis
-     ce dépôt, aucun CDN externe n'est contacté.
-     Les chemins sont absolutisés contre document.baseURI : le store est
-     chargé par un import() dynamique depuis vendor/dc-runtime.js, donc
-     un chemin relatif y serait résolu contre vendor/, pas contre la page. -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AmeBet — carnet de paris</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23161826'/><text x='16' y='23' font-size='19' font-family='sans-serif' font-weight='700' fill='%239184d9' text-anchor='middle'>A</text></svg>">
+
+<!-- Résolution des ressources chargées dynamiquement : équivalent local des
+     blob: URLs du bundle. React et le store sont servis depuis ce dépôt,
+     aucun CDN n'est contacté. -->
 <script>window.__resources = (function (m) {
   for (var k in m) m[k] = new URL(m[k], document.baseURI).href;
   return m;
 })({
-  "store": "./amebet-store.js",
   "https://unpkg.com/react@18.3.1/umd/react.production.min.js": "./vendor/react.production.min.js",
-  "https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js": "./vendor/react-dom.production.min.js"
+  "https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js": "./vendor/react-dom.production.min.js",
+  "store": "./amebet-store.js"
 });</script>
-
-<meta charset="utf-8">
-<title>AmeBet — carnet de paris</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23161826'/><text x='16' y='23' font-size='19' font-family='sans-serif' font-weight='700' fill='%239184d9' text-anchor='middle'>A</text></svg>">
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="vendor/dc-runtime.js"></script>
 
 
@@ -10038,7 +10035,7 @@ textarea.input { min-height: 90px; resize: vertical; }
       <span style="font-size:11px;white-space:nowrap;color:color-mix(in srgb, var(--color-text) 70%, transparent)">{{ sync.label }}</span>
     </div>
     <nav style="display:flex;align-items:center;gap:2px;margin:0 auto 0 0">
-      <sc-for list="{{ navItems }}" as="nv" hint-placeholder-count="3">
+      <sc-for list="{{ navItems }}" as="nv" hint-placeholder-count="4">
         <button type="button" sc-camel-on-click="{{ nv.go }}" style="display:flex;align-items:center;gap:7px;padding:7px 12px;border:0;border-radius:var(--radius-md);background:{{ nv.bg }};color:{{ nv.color }};font:inherit;font-size:14px;font-weight:500;white-space:nowrap;cursor:pointer" style-hover="background:color-mix(in srgb, var(--color-text) 7%, transparent)">
           <i class="{{ nv.icon }}" style="font-size:16px"></i>{{ nv.label }}
         </button>
@@ -10315,6 +10312,83 @@ textarea.input { min-height: 90px; resize: vertical; }
       </sc-raw-tbody>
     </sc-raw-table>
     </sc-if>
+
+    <sc-if value="{{ isForfait }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:var(--space-8);margin-bottom:var(--space-6)">
+      <div>
+        <h2 style="font-size:24px;margin:0 0 5px">Forfaits &amp; spectateurs</h2>
+        <p style="font-size:13px;margin:0;max-width:640px;color:color-mix(in srgb, var(--color-text) 55%, transparent);text-wrap:pretty">Qui est dans l'arène, et avec quel forfait. Cette liste vit à part des paris : elle ne touche ni aux pots ni au bilan. Les forfaits se créent, se renomment et se retarifent à tout moment.</p>
+      </div>
+      <div style="display:flex;gap:var(--space-8);text-align:right;flex:none;white-space:nowrap">
+        <sc-for list="{{ forfaitStats }}" as="fs" hint-placeholder-count="3">
+          <div>
+            <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent);margin-bottom:4px">{{ fs.label }}</div>
+            <div style="font-size:20px;font-weight:500;font-variant-numeric:tabular-nums;color:{{ fs.color }}">{{ fs.value }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <h3 style="font-size:17px;margin:0 0 var(--space-4)">Forfaits proposés</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:var(--space-4);margin-bottom:var(--space-8)">
+      <sc-for list="{{ planCards }}" as="p" hint-placeholder-count="3">
+        <div style="display:flex;flex-direction:column;gap:var(--space-3);border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);padding:var(--space-4)">
+          <input class="input" type="text" value="{{ p.name }}" sc-camel-on-change="{{ p.setName }}" placeholder="Nom du forfait" style="font-size:18px;font-weight:500;padding-left:0;border-color:transparent;background:transparent">
+          <div style="display:flex;align-items:center;gap:7px">
+            <input class="input" type="text" value="{{ p.price }}" sc-camel-on-change="{{ p.setPrice }}" placeholder="0" style="width:118px;text-align:right;font-variant-numeric:tabular-nums;font-size:17px">
+            <span style="font-size:15px;color:var(--color-accent)">両</span>
+          </div>
+          <input class="input" type="text" value="{{ p.perk }}" sc-camel-on-change="{{ p.setPerk }}" placeholder="Ce que ça donne droit" style="font-size:13px">
+          <div style="display:flex;align-items:center;gap:var(--space-3);margin-top:auto;padding-top:var(--space-3);background:linear-gradient(to right,var(--color-divider),transparent) no-repeat top / 100% 1px">
+            <span style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ p.holders }} · {{ p.revenue }}</span>
+            <button type="button" sc-camel-on-click="{{ p.remove }}" title="Retirer ce forfait" style="margin-left:auto;border:0;background:transparent;color:color-mix(in srgb, var(--color-text) 55%, transparent);cursor:pointer;padding:2px;font-size:15px;line-height:1" style-hover="color:var(--color-accent)"><i class="ph ph-trash"></i></button>
+          </div>
+        </div>
+      </sc-for>
+      <button type="button" sc-camel-on-click="{{ addPlan }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;min-height:160px;border:1px dashed var(--color-divider);border-radius:var(--radius-md);background:transparent;color:color-mix(in srgb, var(--color-text) 55%, transparent);font:inherit;font-size:13px;cursor:pointer" style-hover="border-color:var(--color-accent-700);color:var(--color-accent)">
+        <i class="ph ph-plus" style="font-size:20px"></i>Créer un forfait
+      </button>
+    </div>
+
+    <h3 style="font-size:17px;margin:0 0 var(--space-4)">Liste des spectateurs</h3>
+    <div style="display:grid;grid-template-columns:1.1fr 1fr 1.4fr auto;gap:var(--space-3);align-items:end;padding:var(--space-4);border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);margin-bottom:var(--space-6)">
+      <div class="field" style="margin:0"><label>Nom du spectateur</label><input class="input" type="text" value="{{ sDraft.name }}" sc-camel-on-change="{{ sDraft.setName }}" sc-camel-on-key-down="{{ sDraft.key }}" placeholder="Qui entre dans l'arène"></div>
+      <div class="field" style="margin:0"><label>Forfait pris</label>
+        <sc-raw-select class="input" value="{{ sDraft.planId }}" sc-camel-on-change="{{ sDraft.setPlan }}" style="cursor:pointer">
+          <sc-for list="{{ planOptions }}" as="o" hint-placeholder-count="4">
+            <option value="{{ o.id }}" style="background:var(--color-surface)">{{ o.label }}</option>
+          </sc-for>
+        </sc-raw-select>
+      </div>
+      <div class="field" style="margin:0"><label>Note</label><input class="input" type="text" value="{{ sDraft.note }}" sc-camel-on-change="{{ sDraft.setNote }}" sc-camel-on-key-down="{{ sDraft.key }}" placeholder="Place, accompagnant, remarque…"></div>
+      <button type="button" class="btn btn-primary" sc-camel-on-click="{{ sDraft.add }}" style="height:36px">Ajouter à la liste</button>
+    </div>
+
+    <sc-raw-table class="table">
+      <sc-raw-thead><sc-raw-tr><sc-raw-th style="width:24%">Spectateur</sc-raw-th><sc-raw-th style="width:22%">Forfait</sc-raw-th><sc-raw-th style="width:30%">Note</sc-raw-th><sc-raw-th style="text-align:right">Prix</sc-raw-th><sc-raw-th style="text-align:right">Inscrit</sc-raw-th><sc-raw-th style="width:36px"></sc-raw-th></sc-raw-tr></sc-raw-thead>
+      <sc-raw-tbody>
+        <sc-for list="{{ spectators }}" as="sp" hint-placeholder-count="4">
+          <sc-raw-tr>
+            <sc-raw-td><input class="input" type="text" value="{{ sp.name }}" sc-camel-on-change="{{ sp.setName }}" style="font-weight:500;padding-left:0;border-color:transparent;background:transparent"></sc-raw-td>
+            <sc-raw-td>
+              <sc-raw-select class="input" value="{{ sp.planId }}" sc-camel-on-change="{{ sp.setPlan }}" style="cursor:pointer;font-size:13px">
+                <sc-for list="{{ planOptions }}" as="o" hint-placeholder-count="4">
+                  <option value="{{ o.id }}" style="background:var(--color-surface)">{{ o.label }}</option>
+                </sc-for>
+              </sc-raw-select>
+            </sc-raw-td>
+            <sc-raw-td><input class="input" type="text" value="{{ sp.note }}" sc-camel-on-change="{{ sp.setNote }}" placeholder="—" style="font-size:13px;padding-left:0;border-color:transparent;background:transparent"></sc-raw-td>
+            <sc-raw-td style="text-align:right;font-variant-numeric:tabular-nums;color:{{ sp.priceColor }}">{{ sp.price }}</sc-raw-td>
+            <sc-raw-td style="text-align:right;font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ sp.added }}</sc-raw-td>
+            <sc-raw-td style="text-align:right"><button type="button" sc-camel-on-click="{{ sp.remove }}" title="Retirer de la liste" style="border:0;background:transparent;color:color-mix(in srgb, var(--color-text) 55%, transparent);cursor:pointer;padding:2px;font-size:14px;line-height:1" style-hover="color:var(--color-accent)"><i class="ph ph-x"></i></button></sc-raw-td>
+          </sc-raw-tr>
+        </sc-for>
+      </sc-raw-tbody>
+    </sc-raw-table>
+    <sc-if value="{{ noSpectators }}" hint-placeholder-val="{{ false }}">
+      <div style="font-size:13px;margin-top:var(--space-3);color:color-mix(in srgb, var(--color-text) 55%, transparent)">Personne dans la liste. Ajoute le premier spectateur ci-dessus.</div>
+    </sc-if>
+    </sc-if>
   </main>
 
   <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
@@ -10338,6 +10412,7 @@ class Component extends DCLogic {
     loading: true,
     status: { mode: 'boot', label: 'Ouverture…', detail: '' },
     draft: { a: '', b: '' },
+    plans: null, spectators: [], sDraft: { name: '', planId: '', note: '' },
     entries: {}, confirming: null, openDone: {}, toast: null
   };
 
@@ -10366,7 +10441,9 @@ class Component extends DCLogic {
           loading: false,
           fights,
           mode: this._dirty ? s.mode : (settings.mode || s.mode),
-          rates: this._dirty ? s.rates : (settings.rates || s.rates)
+          rates: this._dirty ? s.rates : (settings.rates || s.rates),
+          plans: this._dirty ? s.plans : (settings.plans || s.plans),
+          spectators: this._dirty ? s.spectators : (settings.spectators || s.spectators)
         }))
       });
     } catch (err) {
@@ -10384,12 +10461,27 @@ class Component extends DCLogic {
   /** Réglages partagés (mode de cote, taux par organisateur), écriture groupée. */
   pushSettings(patch) {
     this._dirty = true;
+    this._patch = { ...(this._patch || {}), ...patch };
     clearTimeout(this._save);
     this._save = setTimeout(() => {
-      this._dirty = false;
-      if (this.store) this.store.saveSettings(patch).catch(() => {});
+      const out = this._patch;
+      this._patch = null; this._dirty = false;
+      if (this.store) this.store.saveSettings(out).catch(() => {});
     }, 500);
   }
+
+  /* ------------------------------------------- forfaits & spectateurs      */
+
+  defaultPlans() {
+    return [
+      { id: 'p-gradins', name: 'Gradins', price: 2000, perk: 'Entrée simple, debout' },
+      { id: 'p-tribune', name: 'Tribune', price: 5000, perk: 'Place assise, vue centrale' },
+      { id: 'p-loge', name: 'Loge', price: 12000, perk: 'Salon privé, service à la place' }
+    ];
+  }
+  plansList() { return this.state.plans || this.defaultPlans(); }
+  savePlans(plans) { this.setState({ plans }); this.pushSettings({ plans }); }
+  saveSpectators(spectators) { this.setState({ spectators }); this.pushSettings({ spectators }); }
 
   /* -------------------------------------------------------------- calculs */
 
@@ -10447,6 +10539,17 @@ class Component extends DCLogic {
   }
   payoutOf(f, b) { return b.side === f.winner ? this.projected(f, b) : 0; }
 
+  addSpectator() {
+    const d = this.state.sDraft, name = d.name.trim();
+    if (!name) return this.toast('Indique le nom du spectateur');
+    const specs = this.state.spectators || [];
+    const sp = { id: 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name, planId: d.planId || '', note: d.note.trim(), by: this.who(), at: Date.now() };
+    this.setState({ sDraft: { name: '', planId: d.planId, note: '' } });
+    this.saveSpectators([sp, ...specs]);
+    const plan = this.plansList().find(p => p.id === sp.planId);
+    this.toast(name + (plan ? ' · ' + plan.name : ' · sans forfait'));
+  }
+
   addBet(f) {
     const e = this.entry(f.id), amount = this.parse(e.amount);
     if (!e.name.trim()) return this.toast('Indique le nom du parieur');
@@ -10490,6 +10593,18 @@ class Component extends DCLogic {
       };
     }).sort((x, y) => y._f - x._f);
 
+    /* Forfaits : billetterie de l'arène, indépendante des paris. */
+    const plans = this.plansList();
+    const byId = Object.fromEntries(plans.map(p => [p.id, p]));
+    const specs = s.spectators || [];
+    const priceOf = sp => Math.max(0, Number(byId[sp.planId] && byId[sp.planId].price) || 0);
+    const gate = specs.reduce((t, sp) => t + priceOf(sp), 0);
+    const patchPlan = (id, key, value) => this.savePlans(plans.map(p => p.id === id ? { ...p, [key]: value } : p));
+    const patchSpec = (id, key, value) => this.saveSpectators(specs.map(sp => sp.id === id ? { ...sp, [key]: value } : sp));
+    const planOptions = [{ id: '', label: '— sans forfait —' }].concat(plans.map(p => ({
+      id: p.id, label: p.name + (Number(p.price) ? ' · ' + this.n(p.price) + ' 両' : '')
+    })));
+
     const st = s.status;
     const cloud = st.mode === 'cloud', bad = st.mode === 'error';
     const share = (() => {
@@ -10524,8 +10639,8 @@ class Component extends DCLogic {
       inPlay: this.n(open.reduce((t, f) => t + pot(f), 0)),
       inPlayFees: this.n(open.reduce((t, f) => t + this.fees(f), 0)),
       openCount: String(open.length),
-      isCarnet: s.view === 'carnet', isBilan: s.view === 'bilan', isHisto: s.view === 'histo',
-      navItems: [['carnet', 'Carnet', 'ph ph-boxing-glove'], ['histo', 'Historique', 'ph ph-clock-counter-clockwise'], ['bilan', 'Bilan', 'ph ph-scales']].map(([id, label, icon]) => ({
+      isCarnet: s.view === 'carnet', isBilan: s.view === 'bilan', isHisto: s.view === 'histo', isForfait: s.view === 'forfait',
+      navItems: [['carnet', 'Carnet', 'ph ph-boxing-glove'], ['histo', 'Historique', 'ph ph-clock-counter-clockwise'], ['bilan', 'Bilan', 'ph ph-scales'], ['forfait', 'Forfaits', 'ph ph-ticket']].map(([id, label, icon]) => ({
         label, icon, go: () => this.setState({ view: id }),
         color: s.view === id ? 'var(--color-accent)' : 'var(--color-text)',
         bg: s.view === id ? 'color-mix(in srgb, var(--color-accent) 12%, transparent)' : 'transparent'
@@ -10674,6 +10789,57 @@ class Component extends DCLogic {
         };
       }),
       ledger, noLedger: !s.loading && ledger.length === 0,
+
+      forfaitStats: [
+        { label: 'Spectateurs', value: String(specs.length), color: 'var(--color-text)' },
+        { label: 'Forfaits proposés', value: String(plans.length), color: 'var(--color-text)' },
+        { label: 'Recette billetterie', value: this.n(gate) + ' 両', color: 'var(--color-accent-300)' }
+      ],
+      planCards: plans.map(p => {
+        const holders = specs.filter(sp => sp.planId === p.id);
+        return {
+          name: p.name, price: String(p.price ?? ''), perk: p.perk || '',
+          setName: e => patchPlan(p.id, 'name', e.target.value),
+          setPrice: e => patchPlan(p.id, 'price', this.parse(e.target.value)),
+          setPerk: e => patchPlan(p.id, 'perk', e.target.value),
+          holders: holders.length + (holders.length > 1 ? ' spectateurs' : ' spectateur'),
+          revenue: this.n(holders.length * (Number(p.price) || 0)) + ' 両',
+          remove: () => {
+            this.savePlans(plans.filter(x => x.id !== p.id));
+            if (holders.length) this.saveSpectators(specs.map(sp => sp.planId === p.id ? { ...sp, planId: '' } : sp));
+            this.toast('Forfait « ' + p.name + ' » retiré');
+          }
+        };
+      }),
+      addPlan: () => {
+        const id = 'p-' + Date.now().toString(36);
+        this.savePlans([...plans, { id, name: 'Nouveau forfait', price: 0, perk: '' }]);
+        this.toast('Forfait ajouté — renomme-le');
+      },
+      planOptions,
+      sDraft: {
+        name: s.sDraft.name, planId: s.sDraft.planId, note: s.sDraft.note,
+        setName: e => this.setState({ sDraft: { ...s.sDraft, name: e.target.value } }),
+        setPlan: e => this.setState({ sDraft: { ...s.sDraft, planId: e.target.value } }),
+        setNote: e => this.setState({ sDraft: { ...s.sDraft, note: e.target.value } }),
+        key: e => { if (e.key === 'Enter') this.addSpectator(); },
+        add: () => this.addSpectator()
+      },
+      spectators: specs.map(sp => ({
+        name: sp.name, planId: sp.planId || '', note: sp.note || '',
+        setName: e => patchSpec(sp.id, 'name', e.target.value),
+        setPlan: e => patchSpec(sp.id, 'planId', e.target.value),
+        setNote: e => patchSpec(sp.id, 'note', e.target.value),
+        price: priceOf(sp) ? this.n(priceOf(sp)) + ' 両' : '—',
+        priceColor: priceOf(sp) ? 'var(--color-text)' : this.muted(),
+        added: this.when(sp.at) + ' · ' + (sp.by || '—'),
+        remove: () => {
+          this.saveSpectators(specs.filter(x => x.id !== sp.id));
+          this.toast((sp.name || 'Spectateur') + ' retiré de la liste');
+        }
+      })),
+      noSpectators: specs.length === 0,
+
       hasToast: !!s.toast, toast: s.toast
     };
   }

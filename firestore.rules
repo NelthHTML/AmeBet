@@ -1,23 +1,19 @@
 rules_version = '2';
 
-/* Règles Firestore d'AmeBet.
-   ---------------------------------------------------------------------------
-   La config web (firebase-config.js) est publique par conception : n'importe
-   qui peut lire le apiKey dans le code source du site. La sécurité ne vient
-   donc PAS de la config, elle vient d'ici. Ce fichier est la seule chose qui
-   protège réellement le carnet.
+/* AmeBet — règles Firestore.
 
-   Modèle par défaut (« club privé mou ») : il faut être authentifié — AmeBet
-   ouvre une session anonyme automatiquement — et les données doivent avoir la
-   bonne forme. Concrètement : celui qui connaît l'URL du site peut écrire.
-   C'est le bon compromis pour un carnet partagé entre amis.
+   Modèle de données écrit par amebet-store.js :
 
-   Pour verrouiller davantage, voir la section « Durcir » en bas de fichier.
+     rooms/{salle}/fights/{combat}   { a, b, winner, bets[], createdMs, settledMs, createdAt }
+     rooms/{salle}/meta/settings     { mode, rates, … }  (réglages partagés)
 
-   Arborescence utilisée par amebet-store.js :
-     rooms/{salle}/fights/{combat}     un combat + son tableau de paris
-     rooms/{salle}/meta/settings       réglages partagés (mode de cote, taux)
-   --------------------------------------------------------------------------- */
+   Les organisateurs se connectent en anonyme (Authentication → Anonyme).
+   Tout le monde partage donc la même salle : il n'y a pas de notion de
+   propriétaire, seulement des garde-fous de forme et de volume pour qu'un
+   visiteur mal intentionné ne puisse pas gonfler la base.
+
+   Déploiement :  firebase deploy --only firestore:rules
+*/
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -26,75 +22,47 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function text(v, max) {
-      return v is string && v.size() <= max;
+    // Le nom de salle vient de l'URL (?salle=…). Le client le normalise quand
+    // on l'édite dans le champ « Salle », mais pas quand il arrive brut par
+    // l'URL : on tolère donc les majuscules. Sans cette vérification,
+    // n'importe qui pourrait créer une infinité de salles aux noms arbitraires.
+    function validRoom(room) {
+      return room is string
+          && room.size() > 0 && room.size() <= 40
+          && room.matches('^[A-Za-z0-9-]+$');
     }
 
-    /* Un combat valide. Vérifié sur le document RÉSULTANT : les écritures
-       arrayUnion/arrayRemove sont fusionnées avant l'évaluation des règles,
-       donc request.resource.data porte toujours la forme complète. */
-    function validFight(d) {
-      return text(d.a, 80)
-          && text(d.b, 80)
-          && (d.winner == null || d.winner in ['a', 'b'])
-          && d.createdMs is number
-          && d.bets is list
-          && d.bets.size() <= 500;
+    function validFight() {
+      let d = request.resource.data;
+      return d.a is string && d.a.size() <= 80
+          && d.b is string && d.b.size() <= 80
+          && (!('winner' in d) || d.winner == null || d.winner in ['a', 'b'])
+          && d.bets is list && d.bets.size() <= 300
+          && d.createdMs is number;
     }
 
     match /rooms/{room} {
 
-      // Le document de salle lui-même n'est jamais écrit par l'application.
-      allow read: if signedIn();
+      // Le document de salle lui-même ne porte rien : seules ses
+      // sous-collections sont utilisées.
+      allow read: if signedIn() && validRoom(room);
+      allow write: if false;
 
       match /fights/{fight} {
-        allow read:          if signedIn();
-        allow create, update: if signedIn() && validFight(request.resource.data);
-        allow delete:        if signedIn();
+        allow read:            if signedIn() && validRoom(room);
+        allow create, update:  if signedIn() && validRoom(room) && validFight();
+        allow delete:          if signedIn() && validRoom(room);
       }
 
-      match /meta/{doc} {
-        allow read:  if signedIn();
-        allow write: if signedIn()
-                     && request.resource.data.keys().hasOnly(['mode', 'rates']);
+      match /meta/settings {
+        allow read:  if signedIn() && validRoom(room);
+        allow write: if signedIn() && validRoom(room)
+                     && request.resource.data.size() <= 20;
       }
     }
 
-    // Tout le reste de la base est fermé.
-    match /{document=**} {
-      allow read, write: if false;
-    }
+    // Rien d'autre n'est déclaré : tout chemin hors de rooms/ est refusé par
+    // défaut. (Un match /{document=**} explicite serait inutile ici — les
+    // règles s'additionnent, un « allow ... if false » n'annule rien.)
   }
 }
-
-/* ---------------------------------------------------------------------------
-   DURCIR — deux variantes, à coller à la place des blocs `match /fights` et
-   `match /meta` ci-dessus.
-
-   1. Lecture ouverte, écriture réservée à des comptes nommés.
-      Remplace l'auth anonyme par Google/e-mail dans la console, relève les
-      UID des organisateurs dans Authentication → Users, puis :
-
-        function organizer() {
-          return request.auth != null
-              && request.auth.uid in [
-                   'COLLE_ICI_UID_1',
-                   'COLLE_ICI_UID_2'
-                 ];
-        }
-
-        match /fights/{fight} {
-          allow read:  if request.auth != null;
-          allow write: if organizer();
-        }
-
-   2. Salles privées : seul le créateur d'une salle y écrit. Demande d'écrire
-      rooms/{room} avec un champ owner à la création (petit ajout côté
-      amebet-store.js), puis :
-
-        function owner() {
-          return request.auth != null
-              && get(/databases/$(database)/documents/rooms/$(room)).data.owner
-                 == request.auth.uid;
-        }
-   --------------------------------------------------------------------------- */

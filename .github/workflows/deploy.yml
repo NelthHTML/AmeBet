@@ -37,7 +37,7 @@ jobs:
           FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
         run: node scripts/write-config.mjs
 
-      # Empêche GitHub Pages de faire passer le site dans Jekyll, qui ignore
+      # Empêche GitHub Pages de passer le site dans Jekyll, qui ignorerait
       # les dossiers commençant par un underscore.
       - name: Marquer le site comme statique
         run: touch .nojekyll
