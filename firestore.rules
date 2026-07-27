@@ -1,0 +1,100 @@
+rules_version = '2';
+
+/* Règles Firestore d'AmeBet.
+   ---------------------------------------------------------------------------
+   La config web (firebase-config.js) est publique par conception : n'importe
+   qui peut lire le apiKey dans le code source du site. La sécurité ne vient
+   donc PAS de la config, elle vient d'ici. Ce fichier est la seule chose qui
+   protège réellement le carnet.
+
+   Modèle par défaut (« club privé mou ») : il faut être authentifié — AmeBet
+   ouvre une session anonyme automatiquement — et les données doivent avoir la
+   bonne forme. Concrètement : celui qui connaît l'URL du site peut écrire.
+   C'est le bon compromis pour un carnet partagé entre amis.
+
+   Pour verrouiller davantage, voir la section « Durcir » en bas de fichier.
+
+   Arborescence utilisée par amebet-store.js :
+     rooms/{salle}/fights/{combat}     un combat + son tableau de paris
+     rooms/{salle}/meta/settings       réglages partagés (mode de cote, taux)
+   --------------------------------------------------------------------------- */
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function text(v, max) {
+      return v is string && v.size() <= max;
+    }
+
+    /* Un combat valide. Vérifié sur le document RÉSULTANT : les écritures
+       arrayUnion/arrayRemove sont fusionnées avant l'évaluation des règles,
+       donc request.resource.data porte toujours la forme complète. */
+    function validFight(d) {
+      return text(d.a, 80)
+          && text(d.b, 80)
+          && (d.winner == null || d.winner in ['a', 'b'])
+          && d.createdMs is number
+          && d.bets is list
+          && d.bets.size() <= 500;
+    }
+
+    match /rooms/{room} {
+
+      // Le document de salle lui-même n'est jamais écrit par l'application.
+      allow read: if signedIn();
+
+      match /fights/{fight} {
+        allow read:          if signedIn();
+        allow create, update: if signedIn() && validFight(request.resource.data);
+        allow delete:        if signedIn();
+      }
+
+      match /meta/{doc} {
+        allow read:  if signedIn();
+        allow write: if signedIn()
+                     && request.resource.data.keys().hasOnly(['mode', 'rates']);
+      }
+    }
+
+    // Tout le reste de la base est fermé.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   DURCIR — deux variantes, à coller à la place des blocs `match /fights` et
+   `match /meta` ci-dessus.
+
+   1. Lecture ouverte, écriture réservée à des comptes nommés.
+      Remplace l'auth anonyme par Google/e-mail dans la console, relève les
+      UID des organisateurs dans Authentication → Users, puis :
+
+        function organizer() {
+          return request.auth != null
+              && request.auth.uid in [
+                   'COLLE_ICI_UID_1',
+                   'COLLE_ICI_UID_2'
+                 ];
+        }
+
+        match /fights/{fight} {
+          allow read:  if request.auth != null;
+          allow write: if organizer();
+        }
+
+   2. Salles privées : seul le créateur d'une salle y écrit. Demande d'écrire
+      rooms/{room} avec un champ owner à la création (petit ajout côté
+      amebet-store.js), puis :
+
+        function owner() {
+          return request.auth != null
+              && get(/databases/$(database)/documents/rooms/$(room)).data.owner
+                 == request.auth.uid;
+        }
+   --------------------------------------------------------------------------- */
