@@ -1,4 +1,19 @@
-node_modules/
+# Outils de reconstruction depuis le bundle d'origine — pas nécessaires au site
+_tools/
+_extracted/
+
+# Réglages d'éditeur locaux
+.claude/
+
+# Firebase CLI
 .firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Système
 .DS_Store
-*.log
+Thumbs.db
+desktop.ini
+
+node_modules/

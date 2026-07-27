@@ -1,23 +1,46 @@
-/* Réécrit firebase-config.js à partir du secret FIREBASE_CONFIG (JSON).
-   Sans secret, le placeholder est conservé et AmeBet démarre en mode local. */
+/* Réécrit firebase-config.js à partir de la variable d'environnement
+   FIREBASE_CONFIG (secret GitHub). Utile si tu préfères ne pas versionner
+   ta config — sinon, laisse le fichier commité et ce script ne tourne pas.
+
+   Usage :  FIREBASE_CONFIG='{"apiKey":"...", ...}' node scripts/write-config.mjs
+*/
+
 import { writeFileSync } from 'node:fs';
 
 const raw = process.env.FIREBASE_CONFIG;
+
 if (!raw || !raw.trim()) {
-  console.log('FIREBASE_CONFIG absent — firebase-config.js laissé tel quel (mode local).');
+  console.log('FIREBASE_CONFIG absent — on garde le firebase-config.js du dépôt.');
   process.exit(0);
 }
 
-let cfg;
-try { cfg = JSON.parse(raw); }
-catch (e) { console.error('FIREBASE_CONFIG n’est pas du JSON valide :', e.message); process.exit(1); }
-
-for (const k of ['apiKey', 'projectId', 'appId']) {
-  if (!cfg[k]) { console.error('Clé manquante dans FIREBASE_CONFIG : ' + k); process.exit(1); }
+let config;
+try {
+  config = JSON.parse(raw);
+} catch (err) {
+  console.error('FIREBASE_CONFIG n\'est pas du JSON valide :', err.message);
+  console.error('Attendu : {"apiKey":"...","authDomain":"...","projectId":"...",');
+  console.error('           "storageBucket":"...","messagingSenderId":"...","appId":"..."}');
+  process.exit(1);
 }
 
-writeFileSync('firebase-config.js',
-  '/* Généré par scripts/write-config.mjs — ne pas éditer à la main. */\n' +
-  'window.__AMEBET_FIREBASE__ = ' + JSON.stringify(cfg, null, 2) + ';\n');
+const required = ['apiKey', 'projectId', 'appId'];
+const missing = required.filter((k) => !config[k]);
+if (missing.length) {
+  console.error('Clés manquantes dans FIREBASE_CONFIG :', missing.join(', '));
+  process.exit(1);
+}
 
-console.log('firebase-config.js écrit pour le projet ' + cfg.projectId);
+// Valeurs déductibles : évite d'avoir à toutes les coller dans le secret.
+config.authDomain ??= `${config.projectId}.firebaseapp.com`;
+config.storageBucket ??= `${config.projectId}.appspot.com`;
+
+const body = `/* Généré au déploiement depuis le secret FIREBASE_CONFIG.
+   Ne pas éditer à la main : toute modification sera écrasée au prochain build.
+   Pour travailler en local, édite firebase-config.js dans le dépôt. */
+
+window.__AMEBET_FIREBASE__ = ${JSON.stringify(config, null, 2)};
+`;
+
+writeFileSync('firebase-config.js', body, 'utf8');
+console.log(`firebase-config.js écrit pour le projet « ${config.projectId} ».`);

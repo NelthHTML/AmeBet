@@ -1,41 +1,30 @@
 {
+  "firestore": {
+    "rules": "firestore.rules"
+  },
   "hosting": {
     "public": ".",
     "ignore": [
       "firebase.json",
+      "firestore.rules",
       ".firebaserc",
       "**/.*",
-      "**/node_modules/**",
+      "_tools/**",
       "scripts/**",
-      "archive/**",
-      "README.md",
-      "firestore.rules",
-      "firestore.indexes.json"
+      "*.md"
     ],
+    "cleanUrls": true,
     "headers": [
       {
-        "source": "**/*.@(js|css)",
+        "source": "**/*.@(woff2|woff)",
         "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "public, max-age=3600"
-          }
+          { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
         ]
       },
       {
         "source": "/firebase-config.js",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "no-cache"
-          }
-        ]
+        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
       }
-    ],
-    "cleanUrls": true
-  },
-  "firestore": {
-    "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
+    ]
   }
 }

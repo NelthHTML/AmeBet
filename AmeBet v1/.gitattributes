@@ -1,6 +1,0 @@
-# Le site est déployé depuis un runner Linux : on garde des fins de ligne LF
-# dans le dépôt, quel que soit l'OS de travail.
-* text=auto eol=lf
-
-*.woff2 binary
-*.woff  binary
