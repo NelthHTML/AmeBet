@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<meta name="ext-resource-dependency" content="./amebet-store.js" data-resource-id="store" />
+<template id="__bundler_thumbnail" data-bg-color="#161826">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#161826"/>
+    <rect x="360" y="250" width="480" height="300" rx="24" fill="#1e2033"/>
+    <text x="600" y="430" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="128" font-weight="600" fill="#e9e9ed">AME<tspan fill="#9184d9">BET</tspan></text>
+    <rect x="440" y="476" width="320" height="4" rx="2" fill="#9184d9" opacity=".55"/>
+  </svg>
+</template>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/nocturne-f7850bc9-8642-4a96-b32a-ed72a08233d3/styles.css">
+  <script src="_ds/nocturne-f7850bc9-8642-4a96-b32a-ed72a08233d3/_ds_bundle.js"></script>
+  <script src="firebase-config.js"></script>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+  <style>
+    body { margin: 0; background: var(--color-bg); }
+    @keyframes kb-rise { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+    @keyframes kb-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+    a { color: var(--color-accent); }
+    a:hover { color: var(--color-accent-300); }
+  </style>
+</helmet>
+<div style="min-height:100vh;background:radial-gradient(900px 420px at 10% -8%, var(--color-accent-900), transparent 70%),var(--color-bg);color:var(--color-text);font-family:var(--font-body);font-size:15px">
+
+  <header class="nav" style="position:relative;min-width:1400px;max-width:1440px;margin:0 auto;padding:var(--space-6) var(--space-8)" style-after="content:'';position:absolute;left:var(--space-8);right:var(--space-8);bottom:0;height:1px;background:linear-gradient(to right,transparent,var(--color-divider) 48px,var(--color-divider) calc(100% - 48px),transparent)">
+    <div class="nav-brand" style="display:flex;align-items:baseline;gap:9px">
+      <span>AME<span style="color:var(--color-accent)">BET</span></span>
+      <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;color:color-mix(in srgb, var(--color-text) 55%, transparent)">carnet de paris</span>
+    </div>
+    <div title="{{ sync.detail }}" style="display:flex;align-items:center;gap:7px;flex:none;padding:5px 11px;border-radius:999px;border:1px solid var(--color-divider)">
+      <span style="width:7px;height:7px;border-radius:50%;flex:none;background:{{ sync.dot }};animation:{{ sync.pulse }}"></span>
+      <span style="font-size:11px;white-space:nowrap;color:color-mix(in srgb, var(--color-text) 70%, transparent)">{{ sync.label }}</span>
+    </div>
+    <nav style="display:flex;align-items:center;gap:2px;margin:0 auto 0 0">
+      <sc-for list="{{ navItems }}" as="nv" hint-placeholder-count="4">
+        <button type="button" onClick="{{ nv.go }}" style="display:flex;align-items:center;gap:7px;padding:7px 12px;border:0;border-radius:var(--radius-md);background:{{ nv.bg }};color:{{ nv.color }};font:inherit;font-size:14px;font-weight:500;white-space:nowrap;cursor:pointer" style-hover="background:color-mix(in srgb, var(--color-text) 7%, transparent)">
+          <i class="{{ nv.icon }}" style="font-size:16px"></i>{{ nv.label }}
+        </button>
+      </sc-for>
+    </nav>
+    <div style="display:flex;align-items:flex-end;gap:var(--space-3);flex:none">
+      <div class="field" style="margin:0;width:118px">
+        <label>Salle</label>
+        <input class="input" type="text" value="{{ roomInput }}" onChange="{{ setRoomInput }}" onBlur="{{ commitRoom }}" onKeyDown="{{ roomKey }}" placeholder="principale">
+      </div>
+      <div class="field" style="margin:0;width:160px">
+        <label>Nom de l'organisateur</label>
+        <input class="input" type="text" value="{{ organizer }}" onChange="{{ setOrganizer }}" placeholder="Qui tient le carnet">
+      </div>
+      <div class="field" style="margin:0">
+        <label>Sa part</label>
+        <div style="display:flex;align-items:center;gap:7px">
+          <input class="input" type="text" value="{{ feeInput }}" onChange="{{ setFee }}" placeholder="5" title="S'applique en direct à tous les paris en cours pris par cet organisateur. Un combat validé garde le taux du moment." style="width:58px;text-align:right">
+          <span style="font-size:15px;color:var(--color-accent)">%</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:var(--space-6);text-align:right;flex:none;white-space:nowrap">
+      <div>
+        <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent)">En jeu</div>
+        <div style="font-size:19px;font-weight:500;font-variant-numeric:tabular-nums">{{ inPlay }} <span style="color:var(--color-accent);font-size:14px">両</span></div>
+      </div>
+      <div>
+        <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent)">Bénéfice détaché</div>
+        <div style="font-size:19px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--color-accent-300)">{{ inPlayFees }} <span style="font-size:14px">両</span></div>
+      </div>
+      <div>
+        <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent)">Combats ouverts</div>
+        <div style="font-size:19px;font-weight:500;font-variant-numeric:tabular-nums">{{ openCount }}</div>
+      </div>
+    </div>
+  </header>
+
+  <main style="min-width:1400px;max-width:1440px;margin:0 auto;padding:var(--space-8) var(--space-8) 100px" data-screen-label="Carnet">
+
+    <sc-if value="{{ hasBanner }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-6);padding:var(--space-3) var(--space-4);border-radius:var(--radius-md);border:1px solid var(--color-accent-800);background:color-mix(in srgb, var(--color-accent) 7%, transparent)">
+        <i class="ph ph-cloud-warning" style="font-size:17px;color:var(--color-accent)"></i>
+        <span style="font-size:13px;color:color-mix(in srgb, var(--color-text) 75%, transparent)">{{ banner }}</span>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isCarnet }}" hint-placeholder-val="{{ true }}">
+    <div style="border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);padding:var(--space-6);margin-bottom:var(--space-8)">
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:var(--space-4)">
+        <i class="ph ph-plus-circle" style="font-size:18px;color:var(--color-accent)"></i>
+        <h2 style="font-size:16px;margin:0">Nouveau combat</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr auto 1fr auto;gap:var(--space-4);align-items:end">
+        <div class="field" style="margin:0"><label>Premier combattant</label><input class="input" type="text" value="{{ draft.a }}" onChange="{{ draft.setA }}" placeholder="Nom"></div>
+        <div style="font-size:13px;padding-bottom:9px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">contre</div>
+        <div class="field" style="margin:0"><label>Second combattant</label><input class="input" type="text" value="{{ draft.b }}" onChange="{{ draft.setB }}" placeholder="Nom"></div>
+        <button type="button" class="btn btn-primary" onClick="{{ draft.create }}" style="height:36px">Ouvrir le combat</button>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:var(--space-6);margin-bottom:var(--space-8)">
+      <div>
+        <div style="font-size:13px;font-weight:500;margin-bottom:3px">Calcul des cotes</div>
+        <div style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ modeNote }}</div>
+      </div>
+      <div class="seg" style="margin-left:auto;flex:none">
+        <sc-for list="{{ modes }}" as="m" hint-placeholder-count="2">
+          <label class="seg-opt" style="color:{{ m.color }};box-shadow:{{ m.ring }}"><input type="radio" name="kb-mode" checked="{{ m.on }}" onChange="{{ m.set }}">{{ m.label }}</label>
+        </sc-for>
+      </div>
+    </div>
+
+    <h2 style="font-size:19px;margin:0 0 var(--space-4)">Combats en cours</h2>
+    <div style="display:flex;flex-direction:column;gap:var(--space-4);margin-bottom:var(--space-6)">
+      <sc-for list="{{ openFights }}" as="f" hint-placeholder-count="2">
+        <article style="border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);padding:var(--space-6)">
+          <div style="display:flex;align-items:center;gap:var(--space-4);margin-bottom:var(--space-6)">
+            <span class="tag tag-outline" style="font-size:10px;letter-spacing:.08em;text-transform:uppercase">en cours</span>
+            <span style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ f.created }} · {{ f.betCount }}</span>
+            <span style="margin-left:auto;font-size:12px;font-variant-numeric:tabular-nums;color:color-mix(in srgb, var(--color-text) 55%, transparent)">bénéfice de {{ who }} {{ f.myFees }} 両 · tous organisateurs {{ f.fees }} 両</span>
+            <span style="font-size:14px;font-variant-numeric:tabular-nums;color:color-mix(in srgb, var(--color-text) 55%, transparent)">Mises <span style="font-size:18px;font-weight:500;color:var(--color-text)">{{ f.pot }}</span> 両</span>
+            <span style="font-size:14px;font-variant-numeric:tabular-nums;color:color-mix(in srgb, var(--color-text) 55%, transparent)">À répartir <span style="font-size:18px;font-weight:500;color:var(--color-accent)">{{ f.net }}</span> 両</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-6)">
+            <sc-for list="{{ f.sides }}" as="sd" hint-placeholder-count="2">
+              <div style="border-radius:var(--radius-md);border:1px solid {{ sd.border }};padding:var(--space-4)">
+                <div style="display:flex;align-items:baseline;justify-content:space-between;gap:var(--space-3);margin-bottom:var(--space-2)">
+                  <span style="font-size:19px;font-weight:500">{{ sd.name }}</span>
+                  <span style="font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--color-accent)">{{ sd.odds }}</span>
+                </div>
+                <div style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent);margin-bottom:var(--space-4)">{{ sd.summary }}</div>
+                <div style="display:flex;flex-direction:column;gap:var(--space-2)">
+                  <sc-for list="{{ sd.bets }}" as="b" hint-placeholder-count="2">
+                    <div style="display:flex;align-items:baseline;gap:var(--space-3);font-size:13px;padding-bottom:var(--space-2);background:linear-gradient(to right,var(--color-divider),transparent) no-repeat bottom / 100% 1px">
+                      <span style="flex:1;min-width:0"><span style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ b.name }}</span><span style="display:block;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ b.by }}</span></span>
+                      <span style="font-variant-numeric:tabular-nums">{{ b.amount }}</span>
+                      <span style="font-variant-numeric:tabular-nums;font-size:12px;color:var(--color-accent-300);width:74px;text-align:right">→ {{ b.win }}</span>
+                      <button type="button" onClick="{{ b.remove }}" title="Retirer ce pari" style="border:0;background:transparent;color:color-mix(in srgb, var(--color-text) 55%, transparent);cursor:pointer;padding:0 2px;font-size:14px;line-height:1" style-hover="color:var(--color-accent)"><i class="ph ph-x"></i></button>
+                    </div>
+                  </sc-for>
+                  <sc-if value="{{ sd.empty }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">Aucun pari sur ce combattant.</div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1.2fr .9fr auto auto;gap:var(--space-3);align-items:end;margin-top:var(--space-6)">
+            <div class="field" style="margin:0"><label>Qui parie ?</label><input class="input" type="text" value="{{ f.entry.name }}" onChange="{{ f.entry.setName }}" placeholder="Nom du parieur"></div>
+            <div class="field" style="margin:0"><label>Somme en ryos</label><input class="input" type="text" value="{{ f.entry.amount }}" onChange="{{ f.entry.setAmount }}" placeholder="10 000"></div>
+            <div class="field" style="margin:0"><label>Sur qui ?</label>
+              <div class="seg">
+                <sc-for list="{{ f.entry.picks }}" as="p" hint-placeholder-count="2">
+                  <label class="seg-opt" style="color:{{ p.color }};box-shadow:{{ p.ring }};max-width:150px"><input type="radio" name="{{ p.group }}" checked="{{ p.on }}" onChange="{{ p.set }}"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.label }}</span></label>
+                </sc-for>
+              </div>
+            </div>
+            <button type="button" class="btn btn-primary" onClick="{{ f.entry.add }}" style="height:36px">Enregistrer le pari</button>
+          </div>
+          <sc-if value="{{ f.entry.hasPreview }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:var(--space-4);margin-top:var(--space-3);padding:var(--space-3) var(--space-4);border-radius:var(--radius-md);border:1px solid var(--color-accent-800);background:color-mix(in srgb, var(--color-accent) 7%, transparent);animation:kb-rise .18s ease">
+              <i class="ph ph-calculator" style="font-size:16px;color:var(--color-accent)"></i>
+              <span style="font-size:13px;color:color-mix(in srgb, var(--color-text) 70%, transparent)">{{ f.entry.previewLabel }}</span>
+              <span style="margin-left:auto;display:flex;align-items:baseline;gap:var(--space-4);font-variant-numeric:tabular-nums">
+                <span style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">cote {{ f.entry.previewOdds }}</span>
+                <span style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">gain net {{ f.entry.previewNet }} 両</span>
+                <span style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">ta part {{ f.entry.previewFee }} 両</span>
+                <span style="font-size:19px;font-weight:600;color:var(--color-accent)">{{ f.entry.previewReturn }} 両</span>
+              </span>
+            </div>
+          </sc-if>
+
+          <div style="display:flex;align-items:center;gap:var(--space-3);margin-top:var(--space-6);padding-top:var(--space-4);background:linear-gradient(to right,transparent,var(--color-divider) 48px,var(--color-divider) calc(100% - 48px),transparent) no-repeat top / 100% 1px">
+            <sc-if value="{{ f.confirming }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:var(--space-3);width:100%;animation:kb-rise .18s ease">
+                <span style="font-size:13px;color:color-mix(in srgb, var(--color-text) 70%, transparent)">Qui a gagné ?</span>
+                <sc-for list="{{ f.winners }}" as="w" hint-placeholder-count="2">
+                  <button type="button" class="btn btn-primary" onClick="{{ w.pick }}">{{ w.label }}</button>
+                </sc-for>
+                <button type="button" class="btn btn-ghost" onClick="{{ f.cancelConfirm }}" style="margin-left:auto">Retour</button>
+              </div>
+            </sc-if>
+            <sc-if value="{{ f.idle }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:center;gap:var(--space-3);width:100%">
+                <button type="button" class="btn btn-primary" onClick="{{ f.startConfirm }}"><i class="ph-bold ph-check" style="font-size:14px"></i>Valider le vainqueur</button>
+                <span style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ f.hint }}</span>
+                <button type="button" class="btn btn-secondary" onClick="{{ f.addTest }}" style="margin-left:auto;font-size:12px"><i class="ph ph-flask" style="font-size:14px"></i>Parieur test</button>
+                <button type="button" class="btn btn-ghost" onClick="{{ f.remove }}">Supprimer le combat</button>
+              </div>
+            </sc-if>
+          </div>
+        </article>
+      </sc-for>
+      <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+        <div style="border-radius:var(--radius-md);border:1px solid var(--color-divider);padding:var(--space-8);text-align:center;font-size:13px;color:color-mix(in srgb, var(--color-text) 55%, transparent);animation:kb-pulse 1.4s ease infinite">Ouverture du carnet…</div>
+      </sc-if>
+      <sc-if value="{{ noOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="border-radius:var(--radius-md);border:1px solid var(--color-divider);padding:var(--space-8);text-align:center;font-size:13px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">Aucun combat ouvert. Crée-en un ci-dessus.</div>
+      </sc-if>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:9px;font-size:12px;color:color-mix(in srgb, var(--color-text) 45%, transparent)">
+      <i class="ph ph-link-simple" style="font-size:14px"></i>
+      <span>{{ shareNote }}</span>
+    </div>
+
+    </sc-if>
+
+    <sc-if value="{{ isHisto }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:var(--space-8);margin-bottom:var(--space-6)">
+      <div>
+        <h2 style="font-size:24px;margin:0 0 5px">Historique des combats</h2>
+        <p style="font-size:13px;margin:0;color:color-mix(in srgb, var(--color-text) 55%, transparent);text-wrap:pretty">Tous les combats validés, du plus récent au plus ancien. Ouvre le détail pour revoir qui a misé quoi, qui a encaissé la mise et ce qui a été payé.</p>
+      </div>
+      <div style="display:flex;gap:var(--space-8);text-align:right;flex:none;white-space:nowrap">
+        <sc-for list="{{ histoStats }}" as="hs" hint-placeholder-count="3">
+          <div>
+            <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent);margin-bottom:4px">{{ hs.label }}</div>
+            <div style="font-size:20px;font-weight:500;font-variant-numeric:tabular-nums;color:{{ hs.color }}">{{ hs.value }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <h3 style="font-size:17px;margin:0 0 var(--space-4)">Combats réglés</h3>
+    <div style="display:flex;flex-direction:column;gap:var(--space-3);margin-bottom:var(--space-8)">
+      <sc-for list="{{ doneFights }}" as="f" hint-placeholder-count="1">
+        <article style="border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);padding:var(--space-4) var(--space-6)">
+          <div style="display:flex;align-items:center;gap:var(--space-4)">
+            <i class="ph ph-trophy" style="font-size:17px;color:var(--color-accent)"></i>
+            <span style="font-size:15px"><span style="font-weight:500">{{ f.winnerName }}</span> <span style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">bat {{ f.loserName }}</span></span>
+            <span style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ f.created }}</span>
+            <span style="margin-left:auto;font-size:13px;font-variant-numeric:tabular-nums;color:color-mix(in srgb, var(--color-text) 55%, transparent)">mises {{ f.pot }} 両 · {{ f.paidCount }} · payé {{ f.paid }} 両 · <span style="color:var(--color-accent-300)">bénéfice {{ f.fees }} 両</span></span>
+            <button type="button" class="btn btn-ghost" onClick="{{ f.toggle }}" style="font-size:12px">{{ f.toggleLabel }}<i class="ph-bold {{ f.chevron }}" style="font-size:12px"></i></button>
+          </div>
+          <sc-if value="{{ f.open }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:var(--space-4);padding-top:var(--space-4);background:linear-gradient(to right,transparent,var(--color-divider) 48px,var(--color-divider) calc(100% - 48px),transparent) no-repeat top / 100% 1px;animation:kb-rise .18s ease">
+              <table class="table" style="font-size:13px">
+                <thead><tr><th>Parieur</th><th>Sur</th><th>Pris par</th><th style="text-align:right">Mise</th><th style="text-align:right">À payer</th><th style="text-align:right">Net</th></tr></thead>
+                <tbody>
+                  <sc-for list="{{ f.payouts }}" as="p" hint-placeholder-count="3">
+                    <tr>
+                      <td style="color:{{ p.color }}">{{ p.name }}</td>
+                      <td style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ p.on }}</td>
+                      <td style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ p.by }}</td>
+                      <td style="text-align:right;font-variant-numeric:tabular-nums">{{ p.stake }}</td>
+                      <td style="text-align:right;font-variant-numeric:tabular-nums;color:{{ p.color }}">{{ p.pay }}</td>
+                      <td style="text-align:right;font-variant-numeric:tabular-nums;color:{{ p.color }}">{{ p.net }}</td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+              <button type="button" class="btn btn-ghost" onClick="{{ f.reopen }}" style="margin-top:var(--space-3);font-size:12px">Erreur ? Rouvrir le combat</button>
+            </div>
+          </sc-if>
+        </article>
+      </sc-for>
+      <sc-if value="{{ noDone }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:13px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">Rien de réglé pour l'instant.</div>
+      </sc-if>
+    </div>
+
+    </sc-if>
+
+    <sc-if value="{{ isBilan }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:var(--space-8);margin-bottom:var(--space-6)">
+      <div>
+        <h2 style="font-size:24px;margin:0 0 5px">Bilan des parieurs</h2>
+        <p style="font-size:13px;margin:0;color:color-mix(in srgb, var(--color-text) 55%, transparent);text-wrap:pretty">Sur les combats déjà validés. Les paris en cours sont comptés à part, dans la colonne « en jeu ».</p>
+      </div>
+      <div style="display:flex;gap:var(--space-8);text-align:right;flex:none">
+        <sc-for list="{{ ledgerStats }}" as="st" hint-placeholder-count="3">
+          <div>
+            <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent);margin-bottom:4px">{{ st.label }}</div>
+            <div style="font-size:20px;font-weight:500;font-variant-numeric:tabular-nums;color:{{ st.color }}">{{ st.value }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <table class="table">
+      <thead><tr><th>Parieur</th><th style="text-align:right">Misé</th><th style="text-align:right">Encaissé</th><th style="text-align:right">Net</th><th style="text-align:right">En jeu</th></tr></thead>
+      <tbody>
+        <sc-for list="{{ ledger }}" as="l" hint-placeholder-count="4">
+          <tr>
+            <td style="font-weight:500">{{ l.name }}</td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums">{{ l.staked }}</td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums">{{ l.paid }}</td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums;color:{{ l.color }}">{{ l.net }}</td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ l.live }}</td>
+          </tr>
+        </sc-for>
+      </tbody>
+    </table>
+    <sc-if value="{{ noLedger }}" hint-placeholder-val="{{ false }}">
+      <div style="font-size:13px;margin-top:var(--space-3);color:color-mix(in srgb, var(--color-text) 55%, transparent)">Aucun pari enregistré.</div>
+    </sc-if>
+
+    <h3 style="font-size:17px;margin:var(--space-8) 0 var(--space-2)">Bénéfice par organisateur</h3>
+    <p style="font-size:13px;margin:0 0 var(--space-4);color:color-mix(in srgb, var(--color-text) 55%, transparent)">Ce que chacun a encaissé, et la part détachée du pot qui lui reste.</p>
+    <table class="table">
+      <thead><tr><th>Organisateur</th><th style="text-align:right">Son taux</th><th style="text-align:right">Paris pris</th><th style="text-align:right">Mises encaissées</th><th style="text-align:right">Bénéfice</th></tr></thead>
+      <tbody>
+        <sc-for list="{{ organizers }}" as="og" hint-placeholder-count="2">
+          <tr>
+            <td style="font-weight:500">{{ og.name }}</td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums;color:var(--color-accent)">{{ og.rate }}</td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums">{{ og.count }}</td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums">{{ og.staked }}</td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums;color:var(--color-accent-300)">{{ og.fees }}</td>
+          </tr>
+        </sc-for>
+      </tbody>
+    </table>
+    </sc-if>
+
+    <sc-if value="{{ isForfait }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:var(--space-8);margin-bottom:var(--space-6)">
+      <div>
+        <h2 style="font-size:24px;margin:0 0 5px">Forfaits &amp; spectateurs</h2>
+        <p style="font-size:13px;margin:0;max-width:640px;color:color-mix(in srgb, var(--color-text) 55%, transparent);text-wrap:pretty">Qui est dans l'arène, et avec quel forfait. Cette liste vit à part des paris : elle ne touche ni aux pots ni au bilan. Les forfaits se créent, se renomment et se retarifent à tout moment.</p>
+      </div>
+      <div style="display:flex;gap:var(--space-8);text-align:right;flex:none;white-space:nowrap">
+        <sc-for list="{{ forfaitStats }}" as="fs" hint-placeholder-count="3">
+          <div>
+            <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent);margin-bottom:4px">{{ fs.label }}</div>
+            <div style="font-size:20px;font-weight:500;font-variant-numeric:tabular-nums;color:{{ fs.color }}">{{ fs.value }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <h3 style="font-size:17px;margin:0 0 var(--space-4)">Forfaits proposés</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:var(--space-4);margin-bottom:var(--space-8)">
+      <sc-for list="{{ planCards }}" as="p" hint-placeholder-count="3">
+        <div style="display:flex;flex-direction:column;gap:var(--space-3);border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);padding:var(--space-4)">
+          <input class="input" type="text" value="{{ p.name }}" onChange="{{ p.setName }}" placeholder="Nom du forfait" style="font-size:18px;font-weight:500;padding-left:0;border-color:transparent;background:transparent">
+          <div style="display:flex;align-items:center;gap:7px">
+            <input class="input" type="text" value="{{ p.price }}" onChange="{{ p.setPrice }}" placeholder="0" style="width:118px;text-align:right;font-variant-numeric:tabular-nums;font-size:17px">
+            <span style="font-size:15px;color:var(--color-accent)">両</span>
+          </div>
+          <input class="input" type="text" value="{{ p.perk }}" onChange="{{ p.setPerk }}" placeholder="Ce que ça donne droit" style="font-size:13px">
+          <div style="display:flex;align-items:center;gap:var(--space-3);margin-top:auto;padding-top:var(--space-3);background:linear-gradient(to right,var(--color-divider),transparent) no-repeat top / 100% 1px">
+            <span style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ p.holders }} · {{ p.revenue }}</span>
+            <button type="button" onClick="{{ p.remove }}" title="Retirer ce forfait" style="margin-left:auto;border:0;background:transparent;color:color-mix(in srgb, var(--color-text) 55%, transparent);cursor:pointer;padding:2px;font-size:15px;line-height:1" style-hover="color:var(--color-accent)"><i class="ph ph-trash"></i></button>
+          </div>
+        </div>
+      </sc-for>
+      <button type="button" onClick="{{ addPlan }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;min-height:160px;border:1px dashed var(--color-divider);border-radius:var(--radius-md);background:transparent;color:color-mix(in srgb, var(--color-text) 55%, transparent);font:inherit;font-size:13px;cursor:pointer" style-hover="border-color:var(--color-accent-700);color:var(--color-accent)">
+        <i class="ph ph-plus" style="font-size:20px"></i>Créer un forfait
+      </button>
+    </div>
+
+    <h3 style="font-size:17px;margin:0 0 var(--space-4)">Liste des spectateurs</h3>
+    <div style="display:grid;grid-template-columns:1.1fr 1fr 1.4fr auto;gap:var(--space-3);align-items:end;padding:var(--space-4);border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);margin-bottom:var(--space-6)">
+      <div class="field" style="margin:0"><label>Nom du spectateur</label><input class="input" type="text" value="{{ sDraft.name }}" onChange="{{ sDraft.setName }}" onKeyDown="{{ sDraft.key }}" placeholder="Qui entre dans l'arène"></div>
+      <div class="field" style="margin:0"><label>Forfait pris</label>
+        <select class="input" value="{{ sDraft.planId }}" onChange="{{ sDraft.setPlan }}" style="cursor:pointer">
+          <sc-for list="{{ planOptions }}" as="o" hint-placeholder-count="4">
+            <option value="{{ o.id }}" style="background:var(--color-surface)">{{ o.label }}</option>
+          </sc-for>
+        </select>
+      </div>
+      <div class="field" style="margin:0"><label>Note</label><input class="input" type="text" value="{{ sDraft.note }}" onChange="{{ sDraft.setNote }}" onKeyDown="{{ sDraft.key }}" placeholder="Place, accompagnant, remarque…"></div>
+      <button type="button" class="btn btn-primary" onClick="{{ sDraft.add }}" style="height:36px">Ajouter à la liste</button>
+    </div>
+
+    <table class="table">
+      <thead><tr><th style="width:24%">Spectateur</th><th style="width:22%">Forfait</th><th style="width:30%">Note</th><th style="text-align:right">Prix</th><th style="text-align:right">Inscrit</th><th style="width:36px"></th></tr></thead>
+      <tbody>
+        <sc-for list="{{ spectators }}" as="sp" hint-placeholder-count="4">
+          <tr>
+            <td><input class="input" type="text" value="{{ sp.name }}" onChange="{{ sp.setName }}" style="font-weight:500;padding-left:0;border-color:transparent;background:transparent"></td>
+            <td>
+              <select class="input" value="{{ sp.planId }}" onChange="{{ sp.setPlan }}" style="cursor:pointer;font-size:13px">
+                <sc-for list="{{ planOptions }}" as="o" hint-placeholder-count="4">
+                  <option value="{{ o.id }}" style="background:var(--color-surface)">{{ o.label }}</option>
+                </sc-for>
+              </select>
+            </td>
+            <td><input class="input" type="text" value="{{ sp.note }}" onChange="{{ sp.setNote }}" placeholder="—" style="font-size:13px;padding-left:0;border-color:transparent;background:transparent"></td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums;color:{{ sp.priceColor }}">{{ sp.price }}</td>
+            <td style="text-align:right;font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ sp.added }}</td>
+            <td style="text-align:right"><button type="button" onClick="{{ sp.remove }}" title="Retirer de la liste" style="border:0;background:transparent;color:color-mix(in srgb, var(--color-text) 55%, transparent);cursor:pointer;padding:2px;font-size:14px;line-height:1" style-hover="color:var(--color-accent)"><i class="ph ph-x"></i></button></td>
+          </tr>
+        </sc-for>
+      </tbody>
+    </table>
+    <sc-if value="{{ noSpectators }}" hint-placeholder-val="{{ false }}">
+      <div style="font-size:13px;margin-top:var(--space-3);color:color-mix(in srgb, var(--color-text) 55%, transparent)">Personne dans la liste. Ajoute le premier spectateur ci-dessus.</div>
+    </sc-if>
+    </sc-if>
+  </main>
+
+  <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:70;display:flex;align-items:center;gap:10px;padding:11px 18px;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-lg);animation:kb-rise .2s ease">
+      <i class="ph ph-check-circle" style="font-size:17px;color:var(--color-accent)"></i>
+      <span style="font-size:13px">{{ toast }}</span>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;organizerName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Shin&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Organisateur&quot;},&quot;commission&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0,&quot;max&quot;:20,&quot;step&quot;:1,&quot;unit&quot;:&quot;%&quot;,&quot;default&quot;:5,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Organisateur&quot;},&quot;defaultRoom&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;principale&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Firebase&quot;},&quot;oddsMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;pot&quot;,&quot;fixe&quot;],&quot;default&quot;:&quot;pot&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Cotes&quot;}}">
+class Component extends DCLogic {
+  state = {
+    view: 'carnet',
+    organizer: this.props.organizerName ?? 'Shin',
+    room: '', roomInput: '',
+    mode: this.props.oddsMode ?? 'pot',
+    rates: {},
+    fights: [],
+    loading: true,
+    status: { mode: 'boot', label: 'Ouverture…', detail: '' },
+    draft: { a: '', b: '' },
+    plans: null, spectators: [], sDraft: { name: '', planId: '', note: '' },
+    entries: {}, confirming: null, openDone: {}, toast: null
+  };
+
+  /* ------------------------------------------------------------ connexion */
+
+  componentDidMount() { this.connect(this.initialRoom()); }
+  componentWillUnmount() { if (this.store) this.store.stop(); clearTimeout(this._t); clearTimeout(this._save); }
+
+  initialRoom() {
+    try { const q = new URLSearchParams(location.search).get('salle'); if (q && q.trim()) return q.trim(); } catch (e) {}
+    try { const l = localStorage.getItem('amebet:salle'); if (l) return l; } catch (e) {}
+    return this.props.defaultRoom ?? 'principale';
+  }
+
+  async connect(room) {
+    if (this.store) { this.store.stop(); this.store = null; }
+    this.setState({ room, roomInput: room, loading: true, fights: [], status: { mode: 'boot', label: 'Ouverture…', detail: room } });
+    try { localStorage.setItem('amebet:salle', room); } catch (e) {}
+    try {
+      const src = (window.__resources && window.__resources.store) || new URL('./amebet-store.js', document.baseURI).href;
+      const { createStore } = await import(src);
+      this.store = await createStore({
+        roomId: room,
+        onStatus: status => this.setState({ status }),
+        onData: ({ fights, settings }) => this.setState(s => ({
+          loading: false,
+          fights,
+          mode: this._dirty ? s.mode : (settings.mode || s.mode),
+          rates: this._dirty ? s.rates : (settings.rates || s.rates),
+          plans: this._dirty ? s.plans : (settings.plans || s.plans),
+          spectators: this._dirty ? s.spectators : (settings.spectators || s.spectators)
+        }))
+      });
+    } catch (err) {
+      this.setState({ loading: false, status: { mode: 'error', label: 'Stockage indisponible', detail: String((err && (err.message || err.code)) || err) } });
+    }
+  }
+
+  /** Toute écriture passe par ici : le store choisit Firestore ou le repli local. */
+  async act(run, msg) {
+    if (!this.store) return this.toast('Carnet pas encore connecté');
+    try { await run(this.store); if (msg) this.toast(msg); }
+    catch (e) { this.toast('Refusé par Firebase : ' + ((e && (e.code || e.message)) || 'erreur')); }
+  }
+
+  /** Réglages partagés (mode de cote, taux par organisateur), écriture groupée. */
+  pushSettings(patch) {
+    this._dirty = true;
+    this._patch = { ...(this._patch || {}), ...patch };
+    clearTimeout(this._save);
+    this._save = setTimeout(() => {
+      const out = this._patch;
+      this._patch = null; this._dirty = false;
+      if (this.store) this.store.saveSettings(out).catch(() => {});
+    }, 500);
+  }
+
+  /* ------------------------------------------- forfaits & spectateurs      */
+
+  defaultPlans() {
+    return [
+      { id: 'p-gradins', name: 'Gradins', price: 2000, perk: 'Entrée simple, debout' },
+      { id: 'p-tribune', name: 'Tribune', price: 5000, perk: 'Place assise, vue centrale' },
+      { id: 'p-loge', name: 'Loge', price: 12000, perk: 'Salon privé, service à la place' }
+    ];
+  }
+  plansList() { return this.state.plans || this.defaultPlans(); }
+  savePlans(plans) { this.setState({ plans }); this.pushSettings({ plans }); }
+  saveSpectators(spectators) { this.setState({ spectators }); this.pushSettings({ spectators }); }
+
+  /* -------------------------------------------------------------- calculs */
+
+  n(v) { return Math.round(v).toLocaleString('fr-FR').replace(/\u202f|\u00a0/g, ' '); }
+  o(v) { return v.toFixed(2).replace('.', ','); }
+  sign(v) { return (v > 0 ? '+' : v < 0 ? '−' : '') + this.n(Math.abs(v)); }
+  parse(v) { return Math.max(0, Math.round(Number(String(v).replace(/[^0-9]/g, '')) || 0)); }
+  muted() { return 'color-mix(in srgb, var(--color-text) 55%, transparent)'; }
+  toast(m) { this.setState({ toast: m }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast: null }), 2600); }
+  entry(id) { return this.state.entries[id] || { name: '', amount: '', side: 'a' }; }
+  setEntry(id, patch) { this.setState(s => ({ entries: { ...s.entries, [id]: { ...this.entry(id), ...patch } } })); }
+  who() { return String(this.state.organizer || '').trim() || '—'; }
+  rateOf(name) {
+    const r = this.state.rates[name];
+    const v = r === undefined ? (this.props.commission ?? 5) : r;
+    return Math.min(50, Math.max(0, Number(String(v).replace(',', '.')) || 0));
+  }
+  rate() { return this.rateOf(this.who()); }
+  /** Part de l'organisateur sur un pari. Tant que le combat est ouvert le taux
+      courant s'applique en direct ; une fois validé, le taux du moment est figé. */
+  feeOf(b, f) {
+    const frozen = f && f.winner && b.rate !== undefined;
+    const r = frozen ? b.rate : this.rateOf(b.by || '—');
+    return b.amount * Math.min(50, Math.max(0, Number(r) || 0)) / 100;
+  }
+
+  when(ms) {
+    if (!ms) return 'à l\u2019instant';
+    const d = new Date(ms), now = new Date(), y = new Date(Date.now() - 864e5);
+    const same = (p, q) => p.toDateString() === q.toDateString();
+    const hm = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    if (same(d, now)) return 'aujourd\u2019hui ' + hm;
+    if (same(d, y)) return 'hier ' + hm;
+    return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) + ' ' + hm;
+  }
+
+  /* La part des organisateurs est détachée du pot avant répartition : c'est
+     leur bénéfice, il ne repart pas aux gagnants.
+       pot net = mises − parts
+       partage du pot : cote = pot net / mises du camp
+       cote fixe : 2,00 brut, la part est retirée du gain versé            */
+  fees(f) { return f.bets.reduce((t, b) => t + this.feeOf(b, f), 0); }
+  gross(f) { return f.bets.reduce((t, b) => t + b.amount, 0); }
+  net(f) { return Math.max(0, this.gross(f) - this.fees(f)); }
+  odds(f, side) {
+    if (this.state.mode === 'fixe') return 2;
+    const on = f.bets.filter(b => b.side === side).reduce((t, b) => t + b.amount, 0);
+    if (!on) return 0;
+    return Math.max(0, this.net(f) / on);
+  }
+  /** Gain d'un pari si son camp l'emporte, part de l'organisateur déjà retirée. */
+  projected(f, b) {
+    if (this.state.mode === 'fixe') return Math.max(0, b.amount * 2 - this.feeOf(b, f));
+    return b.amount * this.odds(f, b.side);
+  }
+  payoutOf(f, b) { return b.side === f.winner ? this.projected(f, b) : 0; }
+
+  addSpectator() {
+    const d = this.state.sDraft, name = d.name.trim();
+    if (!name) return this.toast('Indique le nom du spectateur');
+    const specs = this.state.spectators || [];
+    const sp = { id: 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name, planId: d.planId || '', note: d.note.trim(), by: this.who(), at: Date.now() };
+    this.setState({ sDraft: { name: '', planId: d.planId, note: '' } });
+    this.saveSpectators([sp, ...specs]);
+    const plan = this.plansList().find(p => p.id === sp.planId);
+    this.toast(name + (plan ? ' · ' + plan.name : ' · sans forfait'));
+  }
+
+  addBet(f) {
+    const e = this.entry(f.id), amount = this.parse(e.amount);
+    if (!e.name.trim()) return this.toast('Indique le nom du parieur');
+    if (!amount) return this.toast('Indique la somme misée');
+    const bet = { id: 'b' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: e.name.trim(), amount, side: e.side, by: this.who(), rate: this.rate(), at: Date.now() };
+    this.setEntry(f.id, { name: '', amount: '' });
+    this.act(st => st.addBet(f.id, bet), bet.name + ' · ' + this.n(amount) + ' 両 sur ' + f[e.side]);
+  }
+
+  /* --------------------------------------------------------------- rendu  */
+
+  renderVals() {
+    const s = this.state, fixe = s.mode === 'fixe';
+    const pot = f => f.bets.reduce((t, b) => t + b.amount, 0);
+    const open = s.fights.filter(f => !f.winner);
+    const done = s.fights.filter(f => f.winner);
+
+    const names = [...new Set(s.fights.flatMap(f => f.bets.map(b => b.name)))];
+    const ledger = names.map(name => {
+      let staked = 0, paid = 0, live = 0;
+      s.fights.forEach(f => f.bets.filter(b => b.name === name).forEach(b => {
+        if (!f.winner) { live += b.amount; return; }
+        staked += b.amount;
+        paid += this.payoutOf(f, b);
+      }));
+      return { name, staked: this.n(staked) + ' 両', paid: this.n(paid) + ' 両', net: this.sign(paid - staked) + ' 両', live: live ? this.n(live) + ' 両' : '—', color: paid - staked >= 0 ? 'var(--color-accent-300)' : 'var(--color-neutral-400)', _n: paid - staked };
+    }).sort((x, y) => y._n - x._n);
+
+    let tStaked = 0, tPaid = 0;
+    done.forEach(f => f.bets.forEach(b => { tStaked += b.amount; tPaid += this.payoutOf(f, b); }));
+    const allBets = s.fights.flatMap(f => f.bets.map(b => ({ b, f })));
+    const totalFees = allBets.reduce((t, x) => t + this.feeOf(x.b, x.f), 0);
+    const organizers = [...new Set(allBets.map(x => x.b.by || '—'))].map(name => {
+      const mine = allBets.filter(x => (x.b.by || '—') === name);
+      const fees = mine.reduce((t, x) => t + this.feeOf(x.b, x.f), 0);
+      return {
+        name, count: String(mine.length),
+        rate: this.rateOf(name).toString().replace('.', ',') + ' %',
+        staked: this.n(mine.reduce((t, x) => t + x.b.amount, 0)) + ' 両',
+        fees: this.n(fees) + ' 両', _f: fees
+      };
+    }).sort((x, y) => y._f - x._f);
+
+    /* Forfaits : billetterie de l'arène, indépendante des paris. */
+    const plans = this.plansList();
+    const byId = Object.fromEntries(plans.map(p => [p.id, p]));
+    const specs = s.spectators || [];
+    const priceOf = sp => Math.max(0, Number(byId[sp.planId] && byId[sp.planId].price) || 0);
+    const gate = specs.reduce((t, sp) => t + priceOf(sp), 0);
+    const patchPlan = (id, key, value) => this.savePlans(plans.map(p => p.id === id ? { ...p, [key]: value } : p));
+    const patchSpec = (id, key, value) => this.saveSpectators(specs.map(sp => sp.id === id ? { ...sp, [key]: value } : sp));
+    const planOptions = [{ id: '', label: '— sans forfait —' }].concat(plans.map(p => ({
+      id: p.id, label: p.name + (Number(p.price) ? ' · ' + this.n(p.price) + ' 両' : '')
+    })));
+
+    const st = s.status;
+    const cloud = st.mode === 'cloud', bad = st.mode === 'error';
+    const share = (() => {
+      try { const u = new URL(location.href); u.searchParams.set('salle', s.room); return u.href; } catch (e) { return '?salle=' + s.room; }
+    })();
+
+    return {
+      sync: {
+        label: st.label,
+        detail: st.detail || st.label,
+        dot: bad ? 'var(--color-neutral-400)' : cloud ? 'var(--color-accent)' : 'var(--color-neutral-500)',
+        pulse: st.mode === 'boot' || st.label === 'Enregistrement…' ? 'kb-pulse 1.2s ease infinite' : 'none'
+      },
+      hasBanner: !cloud && st.mode !== 'boot',
+      banner: bad
+        ? st.detail
+        : 'Mode local : les paris restent dans ce navigateur. Renseigne firebase-config.js (ou le secret FIREBASE_CONFIG) pour synchroniser la salle entre organisateurs.',
+      shareNote: cloud
+        ? 'Les autres organisateurs rejoignent la même salle avec ce lien : ' + share
+        : 'Salle « ' + s.room + ' » — lien de partage actif une fois Firebase branché : ' + share,
+      roomInput: s.roomInput,
+      setRoomInput: e => this.setState({ roomInput: e.target.value }),
+      commitRoom: e => {
+        const v = String(e.target.value || '').trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '');
+        if (!v || v === s.room) return this.setState({ roomInput: s.room });
+        try { const u = new URL(location.href); u.searchParams.set('salle', v); history.replaceState(null, '', u); } catch (err) {}
+        this.connect(v);
+        this.toast('Salle « ' + v + ' »');
+      },
+      roomKey: e => { if (e.key === 'Enter') e.target.blur(); },
+
+      inPlay: this.n(open.reduce((t, f) => t + pot(f), 0)),
+      inPlayFees: this.n(open.reduce((t, f) => t + this.fees(f), 0)),
+      openCount: String(open.length),
+      isCarnet: s.view === 'carnet', isBilan: s.view === 'bilan', isHisto: s.view === 'histo', isForfait: s.view === 'forfait',
+      navItems: [['carnet', 'Carnet', 'ph ph-boxing-glove'], ['histo', 'Historique', 'ph ph-clock-counter-clockwise'], ['bilan', 'Bilan', 'ph ph-scales'], ['forfait', 'Forfaits', 'ph ph-ticket']].map(([id, label, icon]) => ({
+        label, icon, go: () => this.setState({ view: id }),
+        color: s.view === id ? 'var(--color-accent)' : 'var(--color-text)',
+        bg: s.view === id ? 'color-mix(in srgb, var(--color-accent) 12%, transparent)' : 'transparent'
+      })),
+      histoStats: [
+        { label: 'Combats réglés', value: String(done.length), color: 'var(--color-text)' },
+        { label: 'Misé', value: this.n(tStaked) + ' 両', color: 'var(--color-text)' },
+        { label: 'Payé aux gagnants', value: this.n(tPaid) + ' 両', color: 'var(--color-text)' },
+        { label: 'Bénéfice organisateurs', value: this.n(done.reduce((t, f) => t + this.fees(f), 0)) + ' 両', color: 'var(--color-accent-300)' }
+      ],
+      ledgerStats: [
+        { label: 'Parieurs', value: String(names.length), color: 'var(--color-text)' },
+        { label: 'Misé (réglé)', value: this.n(tStaked) + ' 両', color: 'var(--color-text)' },
+        { label: 'Payé', value: this.n(tPaid) + ' 両', color: 'var(--color-text)' },
+        { label: 'Bénéfice organisateurs', value: this.n(totalFees) + ' 両', color: 'var(--color-accent-300)' }
+      ],
+      modeNote: fixe
+        ? 'Cote fixe à 2,00 : un pari gagnant rapporte le double de la mise, moins la part de l\u2019organisateur qui l\u2019a encaissé. Cette part est son bénéfice.'
+        : 'La part de chaque organisateur est détachée du pot dès la prise du pari. Ce qui reste — le pot net — est partagé entre les gagnants au prorata des mises.',
+      organizer: s.organizer,
+      setOrganizer: e => this.setState({ organizer: e.target.value }),
+      feeInput: s.rates[this.who()] === undefined ? String(this.props.commission ?? 5) : s.rates[this.who()],
+      setFee: e => {
+        const rates = { ...s.rates, [this.who()]: e.target.value };
+        this.setState({ rates });
+        this.pushSettings({ rates });
+      },
+      who: this.who(),
+      organizers,
+      modes: [['pot', 'Partage du pot'], ['fixe', 'Cote fixe 2,00']].map(([id, label]) => ({
+        label, on: s.mode === id,
+        set: () => { this.setState({ mode: id }); this.pushSettings({ mode: id }); },
+        color: s.mode === id ? 'var(--color-accent)' : 'inherit',
+        ring: s.mode === id ? 'inset 0 0 0 1px var(--color-accent)' : 'none'
+      })),
+      draft: {
+        a: s.draft.a, b: s.draft.b,
+        setA: e => this.setState({ draft: { ...s.draft, a: e.target.value } }),
+        setB: e => this.setState({ draft: { ...s.draft, b: e.target.value } }),
+        create: () => {
+          const a = s.draft.a.trim(), b = s.draft.b.trim();
+          if (!a || !b) return this.toast('Indique les deux noms');
+          this.setState({ draft: { a: '', b: '' } });
+          this.act(store => store.createFight(a, b), 'Combat ouvert — ' + a + ' vs ' + b);
+        }
+      },
+      loading: s.loading,
+      noOpen: !s.loading && open.length === 0,
+      openFights: open.map(f => {
+        const e = this.entry(f.id), total = pot(f);
+        const sides = ['a', 'b'].map(side => {
+          const bets = f.bets.filter(b => b.side === side);
+          const on = bets.reduce((t, b) => t + b.amount, 0);
+          const c = this.odds(f, side);
+          return {
+            name: f[side], odds: c ? this.o(c) : '—',
+            summary: on ? this.n(on) + ' 両 misés · ' + bets.length + (bets.length > 1 ? ' paris' : ' pari') : 'aucune mise',
+            border: e.side === side ? 'var(--color-accent-700)' : 'var(--color-divider)',
+            empty: bets.length === 0,
+            bets: bets.map(b => ({
+              name: b.name, amount: this.n(b.amount), win: this.n(this.projected(f, b)),
+              by: 'pris par ' + (b.by || '—') + ' · part ' + this.n(this.feeOf(b, f)) + ' 両',
+              remove: () => this.act(store => store.removeBet(f.id, b), 'Pari de ' + b.name + ' retiré')
+            }))
+          };
+        });
+        return {
+          created: this.when(f.createdMs), pot: this.n(total), net: this.n(this.net(f)),
+          fees: this.n(this.fees(f)),
+          myFees: this.n(f.bets.filter(b => (b.by || '—') === this.who()).reduce((t, b) => t + this.feeOf(b, f), 0)),
+          betCount: f.bets.length + (f.bets.length > 1 ? ' paris' : ' pari'),
+          sides,
+          entry: {
+            name: e.name, amount: e.amount,
+            setName: ev => this.setEntry(f.id, { name: ev.target.value }),
+            setAmount: ev => this.setEntry(f.id, { amount: ev.target.value }),
+            picks: ['a', 'b'].map(side => ({
+              label: f[side], group: 'pick-' + f.id, on: e.side === side,
+              set: () => this.setEntry(f.id, { side }),
+              color: e.side === side ? 'var(--color-accent)' : 'inherit',
+              ring: e.side === side ? 'inset 0 0 0 1px var(--color-accent)' : 'none'
+            })),
+            add: () => this.addBet(f),
+            ...(() => {
+              const amt = this.parse(e.amount);
+              if (!amt) return { hasPreview: false };
+              const onSide = f.bets.filter(b => b.side === e.side).reduce((t, b) => t + b.amount, 0);
+              const fee = amt * this.rate() / 100;
+              const netPot = Math.max(0, total + amt - this.fees(f) - fee);
+              const ret = fixe ? Math.max(0, amt * 2 - fee) : amt * (netPot / (onSide + amt));
+              return {
+                hasPreview: true,
+                previewLabel: 'Si ' + f[e.side] + ' gagne, ' + (e.name.trim() || 'ce parieur') + ' touche',
+                previewOdds: this.o(ret / amt), previewNet: this.sign(ret - amt), previewReturn: this.n(ret),
+                previewFee: this.n(fee)
+              };
+            })()
+          },
+          confirming: s.confirming === f.id, idle: s.confirming !== f.id,
+          hint: total ? this.n(this.net(f)) + ' 両 seront répartis — ' + this.n(this.fees(f)) + ' 両 restent aux organisateurs.' : 'Aucun pari enregistré pour l\u2019instant.',
+          winners: ['a', 'b'].map(side => ({
+            label: f[side],
+            pick: () => {
+              const frozen = f.bets.map(b => ({ ...b, rate: this.rateOf(b.by || '—') }));
+              this.setState({ confirming: null, openDone: { ...s.openDone, [f.id]: true } });
+              this.act(store => store.setWinner(f.id, side, frozen), f[side] + ' déclaré vainqueur — taux figés');
+            }
+          })),
+          startConfirm: () => this.setState({ confirming: f.id }),
+          cancelConfirm: () => this.setState({ confirming: null }),
+          remove: () => this.act(store => store.deleteFight(f.id), 'Combat supprimé'),
+          addTest: () => {
+            const nums = s.fights.flatMap(x => x.bets).map(b => /^Test (\d+)$/.exec(b.name)).filter(Boolean).map(m => Number(m[1]));
+            const num = (nums.length ? Math.max(...nums) : 0) + 1;
+            const amount = 10000 * (1 + num % 3);
+            const sumA = f.bets.filter(b => b.side === 'a').reduce((t, b) => t + b.amount, 0);
+            const side = sumA <= total - sumA ? 'a' : 'b';
+            const bet = { id: 't' + Date.now().toString(36), name: 'Test ' + num, amount, side, by: this.who(), rate: this.rate(), at: Date.now() };
+            this.act(store => store.addBet(f.id, bet), 'Test ' + num + ' · ' + this.n(amount) + ' 両 sur ' + f[side]);
+          }
+        };
+      }),
+      noDone: done.length === 0,
+      doneFights: done.map(f => {
+        const w = f.winner, l = w === 'a' ? 'b' : 'a';
+        const winners = f.bets.filter(b => b.side === w);
+        return {
+          winnerName: f[w], loserName: f[l], created: this.when(f.settledMs || f.createdMs), pot: this.n(pot(f)),
+          paid: this.n(f.bets.reduce((t, b) => t + this.payoutOf(f, b), 0)),
+          fees: this.n(this.fees(f)),
+          paidCount: winners.length + (winners.length > 1 ? ' gagnants' : ' gagnant'),
+          open: !!s.openDone[f.id], toggleLabel: s.openDone[f.id] ? 'Masquer' : 'Détail',
+          chevron: s.openDone[f.id] ? 'ph-caret-up' : 'ph-caret-down',
+          toggle: () => this.setState({ openDone: { ...s.openDone, [f.id]: !s.openDone[f.id] } }),
+          payouts: f.bets.map(b => {
+            const won = b.side === w, payv = this.payoutOf(f, b);
+            return {
+              name: b.name, on: f[b.side], stake: this.n(b.amount) + ' 両',
+              by: b.by || '—',
+              pay: won ? this.n(payv) + ' 両' : '—',
+              net: this.sign(payv - b.amount) + ' 両',
+              color: won ? 'var(--color-accent-300)' : this.muted()
+            };
+          }),
+          reopen: () => this.act(store => store.setWinner(f.id, null), 'Combat rouvert')
+        };
+      }),
+      ledger, noLedger: !s.loading && ledger.length === 0,
+
+      forfaitStats: [
+        { label: 'Spectateurs', value: String(specs.length), color: 'var(--color-text)' },
+        { label: 'Forfaits proposés', value: String(plans.length), color: 'var(--color-text)' },
+        { label: 'Recette billetterie', value: this.n(gate) + ' 両', color: 'var(--color-accent-300)' }
+      ],
+      planCards: plans.map(p => {
+        const holders = specs.filter(sp => sp.planId === p.id);
+        return {
+          name: p.name, price: String(p.price ?? ''), perk: p.perk || '',
+          setName: e => patchPlan(p.id, 'name', e.target.value),
+          setPrice: e => patchPlan(p.id, 'price', this.parse(e.target.value)),
+          setPerk: e => patchPlan(p.id, 'perk', e.target.value),
+          holders: holders.length + (holders.length > 1 ? ' spectateurs' : ' spectateur'),
+          revenue: this.n(holders.length * (Number(p.price) || 0)) + ' 両',
+          remove: () => {
+            this.savePlans(plans.filter(x => x.id !== p.id));
+            if (holders.length) this.saveSpectators(specs.map(sp => sp.planId === p.id ? { ...sp, planId: '' } : sp));
+            this.toast('Forfait « ' + p.name + ' » retiré');
+          }
+        };
+      }),
+      addPlan: () => {
+        const id = 'p-' + Date.now().toString(36);
+        this.savePlans([...plans, { id, name: 'Nouveau forfait', price: 0, perk: '' }]);
+        this.toast('Forfait ajouté — renomme-le');
+      },
+      planOptions,
+      sDraft: {
+        name: s.sDraft.name, planId: s.sDraft.planId, note: s.sDraft.note,
+        setName: e => this.setState({ sDraft: { ...s.sDraft, name: e.target.value } }),
+        setPlan: e => this.setState({ sDraft: { ...s.sDraft, planId: e.target.value } }),
+        setNote: e => this.setState({ sDraft: { ...s.sDraft, note: e.target.value } }),
+        key: e => { if (e.key === 'Enter') this.addSpectator(); },
+        add: () => this.addSpectator()
+      },
+      spectators: specs.map(sp => ({
+        name: sp.name, planId: sp.planId || '', note: sp.note || '',
+        setName: e => patchSpec(sp.id, 'name', e.target.value),
+        setPlan: e => patchSpec(sp.id, 'planId', e.target.value),
+        setNote: e => patchSpec(sp.id, 'note', e.target.value),
+        price: priceOf(sp) ? this.n(priceOf(sp)) + ' 両' : '—',
+        priceColor: priceOf(sp) ? 'var(--color-text)' : this.muted(),
+        added: this.when(sp.at) + ' · ' + (sp.by || '—'),
+        remove: () => {
+          this.saveSpectators(specs.filter(x => x.id !== sp.id));
+          this.toast((sp.name || 'Spectateur') + ' retiré de la liste');
+        }
+      })),
+      noSpectators: specs.length === 0,
+
+      hasToast: !!s.toast, toast: s.toast
+    };
+  }
+}
+
+</script>
+</body>
+</html>

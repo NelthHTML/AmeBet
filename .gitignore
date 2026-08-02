@@ -1,19 +1,17 @@
-# Outils de reconstruction depuis le bundle Claude — pas nécessaires au site
+node_modules/
+.firebase/
+.DS_Store
+*.log
+
+# Sous-produits de l'export Claude, pas nécessaires au site :
+# les deux bundles mono-fichier de 5 Mo, la vignette et le slot d'image inutilisé.
+AmeBet.html
+AmeBet hors-ligne.html
+.thumbnail
+image-slot.js
+
+# Serveur de test local
 _tools/
-_extract/
 
 # Réglages d'éditeur locaux
 .claude/
-
-# Firebase CLI
-.firebase/
-firebase-debug.log
-firestore-debug.log
-ui-debug.log
-
-# Système
-.DS_Store
-Thumbs.db
-desktop.ini
-
-node_modules/

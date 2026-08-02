@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/nocturne-f7850bc9-8642-4a96-b32a-ed72a08233d3/styles.css">
+  <script src="_ds/nocturne-f7850bc9-8642-4a96-b32a-ed72a08233d3/_ds_bundle.js"></script>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+  <style>
+    body { margin: 0; background: var(--color-bg); }
+    @keyframes kb-rise { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+    a { color: var(--color-accent); }
+    a:hover { color: var(--color-accent-300); }
+  </style>
+</helmet>
+<div style="min-height:100vh;background:radial-gradient(900px 420px at 10% -8%, var(--color-accent-900), transparent 70%),var(--color-bg);color:var(--color-text);font-family:var(--font-body);font-size:15px">
+
+  <header class="nav" style="position:relative;min-width:1240px;max-width:1280px;margin:0 auto;padding:var(--space-6) var(--space-8)" style-after="content:'';position:absolute;left:var(--space-8);right:var(--space-8);bottom:0;height:1px;background:linear-gradient(to right,transparent,var(--color-divider) 48px,var(--color-divider) calc(100% - 48px),transparent)">
+    <div class="nav-brand" style="display:flex;align-items:baseline;gap:9px;margin-right:var(--space-8)">
+      <span>KAGE<span style="color:var(--color-accent)">BET</span></span>
+      <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;color:color-mix(in srgb, var(--color-text) 55%, transparent)">carnet de paris</span>
+    </div>
+    <nav style="display:flex;align-items:center;gap:2px;margin:0 auto 0 0">
+      <sc-for list="{{ navItems }}" as="nv" hint-placeholder-count="2">
+        <button type="button" onClick="{{ nv.go }}" style="display:flex;align-items:center;gap:7px;padding:7px 12px;border:0;border-radius:var(--radius-md);background:{{ nv.bg }};color:{{ nv.color }};font:inherit;font-size:14px;font-weight:500;white-space:nowrap;cursor:pointer" style-hover="background:color-mix(in srgb, var(--color-text) 7%, transparent)">
+          <i class="{{ nv.icon }}" style="font-size:16px"></i>{{ nv.label }}
+        </button>
+      </sc-for>
+    </nav>
+    <div style="display:flex;align-items:flex-end;gap:var(--space-3);flex:none">
+      <div class="field" style="margin:0;width:190px">
+        <label>Nom de l'organisateur</label>
+        <input class="input" type="text" value="{{ organizer }}" onChange="{{ setOrganizer }}" placeholder="Qui tient le carnet">
+      </div>
+      <div class="field" style="margin:0">
+        <label>Sa part</label>
+        <div style="display:flex;align-items:center;gap:7px">
+          <input class="input" type="text" value="{{ feeInput }}" onChange="{{ setFee }}" placeholder="5" style="width:62px;text-align:right">
+          <span style="font-size:15px;color:var(--color-accent)">%</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:var(--space-8);text-align:right;flex:none;white-space:nowrap">
+      <div>
+        <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent)">En jeu</div>
+        <div style="font-size:19px;font-weight:500;font-variant-numeric:tabular-nums">{{ inPlay }} <span style="color:var(--color-accent);font-size:14px">両</span></div>
+      </div>
+      <div>
+        <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent)">Combats ouverts</div>
+        <div style="font-size:19px;font-weight:500;font-variant-numeric:tabular-nums">{{ openCount }}</div>
+      </div>
+    </div>
+  </header>
+
+  <main style="min-width:1240px;max-width:1280px;margin:0 auto;padding:var(--space-8) var(--space-8) 100px" data-screen-label="Carnet">
+
+    <sc-if value="{{ isCarnet }}" hint-placeholder-val="{{ true }}">
+    <div style="border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);padding:var(--space-6);margin-bottom:var(--space-8)">
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:var(--space-4)">
+        <i class="ph ph-plus-circle" style="font-size:18px;color:var(--color-accent)"></i>
+        <h2 style="font-size:16px;margin:0">Nouveau combat</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr auto 1fr auto;gap:var(--space-4);align-items:end">
+        <div class="field" style="margin:0"><label>Premier combattant</label><input class="input" type="text" value="{{ draft.a }}" onChange="{{ draft.setA }}" placeholder="Nom"></div>
+        <div style="font-size:13px;padding-bottom:9px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">contre</div>
+        <div class="field" style="margin:0"><label>Second combattant</label><input class="input" type="text" value="{{ draft.b }}" onChange="{{ draft.setB }}" placeholder="Nom"></div>
+        <button type="button" class="btn btn-primary" onClick="{{ draft.create }}" style="height:36px">Ouvrir le combat</button>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:var(--space-6);margin-bottom:var(--space-8)">
+      <div>
+        <div style="font-size:13px;font-weight:500;margin-bottom:3px">Calcul des cotes</div>
+        <div style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ modeNote }}</div>
+      </div>
+      <div class="seg" style="margin-left:auto;flex:none">
+        <sc-for list="{{ modes }}" as="m" hint-placeholder-count="2">
+          <label class="seg-opt" style="color:{{ m.color }};box-shadow:{{ m.ring }}"><input type="radio" name="kb-mode" checked="{{ m.on }}" onChange="{{ m.set }}">{{ m.label }}</label>
+        </sc-for>
+      </div>
+    </div>
+
+    <h2 style="font-size:19px;margin:0 0 var(--space-4)">Combats en cours</h2>
+    <div style="display:flex;flex-direction:column;gap:var(--space-4);margin-bottom:var(--space-8)">
+      <sc-for list="{{ openFights }}" as="f" hint-placeholder-count="2">
+        <article style="border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);padding:var(--space-6)">
+          <div style="display:flex;align-items:center;gap:var(--space-4);margin-bottom:var(--space-6)">
+            <span class="tag tag-outline" style="font-size:10px;letter-spacing:.08em;text-transform:uppercase">en cours</span>
+            <span style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ f.created }} · {{ f.betCount }}</span>
+            <span style="margin-left:auto;font-size:12px;font-variant-numeric:tabular-nums;color:color-mix(in srgb, var(--color-text) 55%, transparent)">part de {{ who }} {{ f.myFees }} 両 · tous organisateurs {{ f.fees }} 両</span>
+            <span style="font-size:14px;font-variant-numeric:tabular-nums">Pot <span style="font-size:18px;font-weight:500">{{ f.pot }}</span> <span style="color:var(--color-accent)">両</span></span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-6)">
+            <sc-for list="{{ f.sides }}" as="sd" hint-placeholder-count="2">
+              <div style="border-radius:var(--radius-md);border:1px solid {{ sd.border }};padding:var(--space-4)">
+                <div style="display:flex;align-items:baseline;justify-content:space-between;gap:var(--space-3);margin-bottom:var(--space-2)">
+                  <span style="font-size:19px;font-weight:500">{{ sd.name }}</span>
+                  <span style="font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--color-accent)">{{ sd.odds }}</span>
+                </div>
+                <div style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent);margin-bottom:var(--space-4)">{{ sd.summary }}</div>
+                <div style="display:flex;flex-direction:column;gap:var(--space-2)">
+                  <sc-for list="{{ sd.bets }}" as="b" hint-placeholder-count="2">
+                    <div style="display:flex;align-items:baseline;gap:var(--space-3);font-size:13px;padding-bottom:var(--space-2);background:linear-gradient(to right,var(--color-divider),transparent) no-repeat bottom / 100% 1px">
+                      <span style="flex:1;min-width:0"><span style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ b.name }}</span><span style="display:block;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ b.by }}</span></span>
+                      <span style="font-variant-numeric:tabular-nums">{{ b.amount }}</span>
+                      <span style="font-variant-numeric:tabular-nums;font-size:12px;color:var(--color-accent-300);width:74px;text-align:right">→ {{ b.win }}</span>
+                      <button type="button" onClick="{{ b.remove }}" title="Retirer ce pari" style="border:0;background:transparent;color:color-mix(in srgb, var(--color-text) 55%, transparent);cursor:pointer;padding:0 2px;font-size:14px;line-height:1" style-hover="color:var(--color-accent)"><i class="ph ph-x"></i></button>
+                    </div>
+                  </sc-for>
+                  <sc-if value="{{ sd.empty }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">Aucun pari sur ce combattant.</div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1.2fr .9fr auto auto;gap:var(--space-3);align-items:end;margin-top:var(--space-6)">
+            <div class="field" style="margin:0"><label>Qui parie ?</label><input class="input" type="text" value="{{ f.entry.name }}" onChange="{{ f.entry.setName }}" placeholder="Nom du parieur"></div>
+            <div class="field" style="margin:0"><label>Somme en ryos</label><input class="input" type="text" value="{{ f.entry.amount }}" onChange="{{ f.entry.setAmount }}" placeholder="10 000"></div>
+            <div class="field" style="margin:0"><label>Sur qui ?</label>
+              <div class="seg">
+                <sc-for list="{{ f.entry.picks }}" as="p" hint-placeholder-count="2">
+                  <label class="seg-opt" style="color:{{ p.color }};box-shadow:{{ p.ring }};max-width:150px"><input type="radio" name="{{ p.group }}" checked="{{ p.on }}" onChange="{{ p.set }}"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.label }}</span></label>
+                </sc-for>
+              </div>
+            </div>
+            <button type="button" class="btn btn-primary" onClick="{{ f.entry.add }}" style="height:36px">Enregistrer le pari</button>
+          </div>
+          <sc-if value="{{ f.entry.hasPreview }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:var(--space-4);margin-top:var(--space-3);padding:var(--space-3) var(--space-4);border-radius:var(--radius-md);border:1px solid var(--color-accent-800);background:color-mix(in srgb, var(--color-accent) 7%, transparent);animation:kb-rise .18s ease">
+              <i class="ph ph-calculator" style="font-size:16px;color:var(--color-accent)"></i>
+              <span style="font-size:13px;color:color-mix(in srgb, var(--color-text) 70%, transparent)">{{ f.entry.previewLabel }}</span>
+              <span style="margin-left:auto;display:flex;align-items:baseline;gap:var(--space-4);font-variant-numeric:tabular-nums">
+                <span style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">cote {{ f.entry.previewOdds }}</span>
+                <span style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">gain net {{ f.entry.previewNet }} 両</span>
+                <span style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">ta part {{ f.entry.previewFee }} 両</span>
+                <span style="font-size:19px;font-weight:600;color:var(--color-accent)">{{ f.entry.previewReturn }} 両</span>
+              </span>
+            </div>
+          </sc-if>
+
+          <div style="display:flex;align-items:center;gap:var(--space-3);margin-top:var(--space-6);padding-top:var(--space-4);background:linear-gradient(to right,transparent,var(--color-divider) 48px,var(--color-divider) calc(100% - 48px),transparent) no-repeat top / 100% 1px">
+            <sc-if value="{{ f.confirming }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:var(--space-3);width:100%;animation:kb-rise .18s ease">
+                <span style="font-size:13px;color:color-mix(in srgb, var(--color-text) 70%, transparent)">Qui a gagné ?</span>
+                <sc-for list="{{ f.winners }}" as="w" hint-placeholder-count="2">
+                  <button type="button" class="btn btn-primary" onClick="{{ w.pick }}">{{ w.label }}</button>
+                </sc-for>
+                <button type="button" class="btn btn-ghost" onClick="{{ f.cancelConfirm }}" style="margin-left:auto">Retour</button>
+              </div>
+            </sc-if>
+            <sc-if value="{{ f.idle }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:center;gap:var(--space-3);width:100%">
+                <button type="button" class="btn btn-primary" onClick="{{ f.startConfirm }}"><i class="ph-bold ph-check" style="font-size:14px"></i>Valider le vainqueur</button>
+                <span style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ f.hint }}</span>
+                <button type="button" class="btn btn-secondary" onClick="{{ f.addTest }}" style="margin-left:auto;font-size:12px"><i class="ph ph-flask" style="font-size:14px"></i>Parieur test</button>
+                <button type="button" class="btn btn-ghost" onClick="{{ f.remove }}">Supprimer le combat</button>
+              </div>
+            </sc-if>
+          </div>
+        </article>
+      </sc-for>
+      <sc-if value="{{ noOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="border-radius:var(--radius-md);border:1px solid var(--color-divider);padding:var(--space-8);text-align:center;font-size:13px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">Aucun combat ouvert. Crée-en un ci-dessus.</div>
+      </sc-if>
+    </div>
+
+    </sc-if>
+
+    <sc-if value="{{ isHisto }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:var(--space-8);margin-bottom:var(--space-6)">
+      <div>
+        <h2 style="font-size:24px;margin:0 0 5px">Historique des combats</h2>
+        <p style="font-size:13px;margin:0;color:color-mix(in srgb, var(--color-text) 55%, transparent);text-wrap:pretty">Tous les combats validés, du plus récent au plus ancien. Ouvre le détail pour revoir qui a misé quoi, qui a encaissé la mise et ce qui a été payé.</p>
+      </div>
+      <div style="display:flex;gap:var(--space-8);text-align:right;flex:none;white-space:nowrap">
+        <sc-for list="{{ histoStats }}" as="hs" hint-placeholder-count="3">
+          <div>
+            <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent);margin-bottom:4px">{{ hs.label }}</div>
+            <div style="font-size:20px;font-weight:500;font-variant-numeric:tabular-nums;color:{{ hs.color }}">{{ hs.value }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <h3 style="font-size:17px;margin:0 0 var(--space-4)">Combats réglés</h3>
+    <div style="display:flex;flex-direction:column;gap:var(--space-3);margin-bottom:var(--space-8)">
+      <sc-for list="{{ doneFights }}" as="f" hint-placeholder-count="1">
+        <article style="border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);padding:var(--space-4) var(--space-6)">
+          <div style="display:flex;align-items:center;gap:var(--space-4)">
+            <i class="ph ph-trophy" style="font-size:17px;color:var(--color-accent)"></i>
+            <span style="font-size:15px"><span style="font-weight:500">{{ f.winnerName }}</span> <span style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">bat {{ f.loserName }}</span></span>
+            <span style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ f.created }}</span>
+            <span style="margin-left:auto;font-size:13px;font-variant-numeric:tabular-nums;color:color-mix(in srgb, var(--color-text) 55%, transparent)">pot {{ f.pot }} 両 · {{ f.paidCount }} · parts {{ f.fees }} 両</span>
+            <button type="button" class="btn btn-ghost" onClick="{{ f.toggle }}" style="font-size:12px">{{ f.toggleLabel }}<i class="ph-bold {{ f.chevron }}" style="font-size:12px"></i></button>
+          </div>
+          <sc-if value="{{ f.open }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:var(--space-4);padding-top:var(--space-4);background:linear-gradient(to right,transparent,var(--color-divider) 48px,var(--color-divider) calc(100% - 48px),transparent) no-repeat top / 100% 1px;animation:kb-rise .18s ease">
+              <table class="table" style="font-size:13px">
+                <thead><tr><th>Parieur</th><th>Sur</th><th>Pris par</th><th style="text-align:right">Mise</th><th style="text-align:right">À payer</th><th style="text-align:right">Net</th></tr></thead>
+                <tbody>
+                  <sc-for list="{{ f.payouts }}" as="p" hint-placeholder-count="3">
+                    <tr>
+                      <td style="color:{{ p.color }}">{{ p.name }}</td>
+                      <td style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ p.on }}</td>
+                      <td style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ p.by }}</td>
+                      <td style="text-align:right;font-variant-numeric:tabular-nums">{{ p.stake }}</td>
+                      <td style="text-align:right;font-variant-numeric:tabular-nums;color:{{ p.color }}">{{ p.pay }}</td>
+                      <td style="text-align:right;font-variant-numeric:tabular-nums;color:{{ p.color }}">{{ p.net }}</td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+              <button type="button" class="btn btn-ghost" onClick="{{ f.reopen }}" style="margin-top:var(--space-3);font-size:12px">Erreur ? Rouvrir le combat</button>
+            </div>
+          </sc-if>
+        </article>
+      </sc-for>
+      <sc-if value="{{ noDone }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:13px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">Rien de réglé pour l'instant.</div>
+      </sc-if>
+    </div>
+
+    </sc-if>
+
+    <sc-if value="{{ isBilan }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:var(--space-8);margin-bottom:var(--space-6)">
+      <div>
+        <h2 style="font-size:24px;margin:0 0 5px">Bilan des parieurs</h2>
+        <p style="font-size:13px;margin:0;color:color-mix(in srgb, var(--color-text) 55%, transparent);text-wrap:pretty">Sur les combats déjà validés. Les paris en cours sont comptés à part, dans la colonne « en jeu ».</p>
+      </div>
+      <div style="display:flex;gap:var(--space-8);text-align:right;flex:none">
+        <sc-for list="{{ ledgerStats }}" as="st" hint-placeholder-count="3">
+          <div>
+            <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent);margin-bottom:4px">{{ st.label }}</div>
+            <div style="font-size:20px;font-weight:500;font-variant-numeric:tabular-nums;color:{{ st.color }}">{{ st.value }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <table class="table">
+      <thead><tr><th>Parieur</th><th style="text-align:right">Misé</th><th style="text-align:right">Encaissé</th><th style="text-align:right">Net</th><th style="text-align:right">En jeu</th></tr></thead>
+      <tbody>
+        <sc-for list="{{ ledger }}" as="l" hint-placeholder-count="4">
+          <tr>
+            <td style="font-weight:500">{{ l.name }}</td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums">{{ l.staked }}</td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums">{{ l.paid }}</td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums;color:{{ l.color }}">{{ l.net }}</td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ l.live }}</td>
+          </tr>
+        </sc-for>
+      </tbody>
+    </table>
+    <sc-if value="{{ noLedger }}" hint-placeholder-val="{{ false }}">
+      <div style="font-size:13px;margin-top:var(--space-3);color:color-mix(in srgb, var(--color-text) 55%, transparent)">Aucun pari enregistré.</div>
+    </sc-if>
+
+    <h3 style="font-size:17px;margin:var(--space-8) 0 var(--space-2)">Prises par organisateur</h3>
+    <p style="font-size:13px;margin:0 0 var(--space-4);color:color-mix(in srgb, var(--color-text) 55%, transparent)">Qui a encaissé quelle mise, et ce que ça rapporte à chacun.</p>
+    <table class="table">
+      <thead><tr><th>Organisateur</th><th style="text-align:right">Son taux</th><th style="text-align:right">Paris pris</th><th style="text-align:right">Mises encaissées</th><th style="text-align:right">Sa part</th></tr></thead>
+      <tbody>
+        <sc-for list="{{ organizers }}" as="og" hint-placeholder-count="2">
+          <tr>
+            <td style="font-weight:500">{{ og.name }}</td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums;color:var(--color-accent)">{{ og.rate }}</td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums">{{ og.count }}</td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums">{{ og.staked }}</td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums;color:var(--color-accent-300)">{{ og.fees }}</td>
+          </tr>
+        </sc-for>
+      </tbody>
+    </table>
+    </sc-if>
+  </main>
+
+  <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:70;display:flex;align-items:center;gap:10px;padding:11px 18px;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-lg);animation:kb-rise .2s ease">
+      <i class="ph ph-check-circle" style="font-size:17px;color:var(--color-accent)"></i>
+      <span style="font-size:13px">{{ toast }}</span>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;organizerName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Shin&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Organisateur&quot;},&quot;commission&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0,&quot;max&quot;:20,&quot;step&quot;:1,&quot;unit&quot;:&quot;%&quot;,&quot;default&quot;:5,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Organisateur&quot;},&quot;oddsMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;pot&quot;,&quot;fixe&quot;],&quot;default&quot;:&quot;pot&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Cotes&quot;}}">
+class Component extends DCLogic {
+  state = {
+    mode: this.props.oddsMode ?? 'pot',
+    view: 'carnet',
+    organizer: this.props.organizerName ?? 'Shin',
+    rates: { Shin: '5', Rin: '8' },
+    draft: { a: '', b: '' },
+    entries: {},
+    confirming: null,
+    openDone: {},
+    toast: null,
+    fights: [
+      { id: 'f1', a: 'Kaen Rikudō', b: 'Suiga Mizuhara', created: "aujourd'hui", winner: null,
+        bets: [
+          { id: 'x1', name: 'Ayame', amount: 20000, side: 'a', by: 'Shin', rate: 5 },
+          { id: 'x2', name: 'Genma', amount: 32000, side: 'b', by: 'Rin', rate: 8 },
+          { id: 'x3', name: 'Rurika', amount: 15000, side: 'a', by: 'Shin', rate: 5 },
+          { id: 'x4', name: 'Mokuren', amount: 8000, side: 'a', by: 'Rin', rate: 8 }
+        ] },
+      { id: 'f2', a: 'Tsurara Yukimura', b: 'Gyōdō Kurotsuki', created: "aujourd'hui", winner: null,
+        bets: [ { id: 'x5', name: 'Genma', amount: 25000, side: 'a', by: 'Shin', rate: 5 } ] },
+      { id: 'f0', a: 'Ibuki Nagare', b: 'Kōsuke Tanma', created: 'hier', winner: 'a',
+        bets: [
+          { id: 'y1', name: 'Ayame', amount: 30000, side: 'a', by: 'Shin', rate: 5 },
+          { id: 'y2', name: 'Rurika', amount: 20000, side: 'b', by: 'Shin', rate: 5 },
+          { id: 'y3', name: 'Mokuren', amount: 10000, side: 'b', by: 'Rin', rate: 8 }
+        ] }
+    ]
+  };
+
+  n(v) { return Math.round(v).toLocaleString('fr-FR').replace(/\u202f|\u00a0/g, ' '); }
+  o(v) { return v.toFixed(2).replace('.', ','); }
+  sign(v) { return (v > 0 ? '+' : v < 0 ? '−' : '') + this.n(Math.abs(v)); }
+  parse(v) { return Math.max(0, Math.round(Number(String(v).replace(/[^0-9]/g, '')) || 0)); }
+  muted() { return 'color-mix(in srgb, var(--color-text) 55%, transparent)'; }
+  toast(m) { this.setState({ toast: m }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast: null }), 2600); }
+  entry(id) { return this.state.entries[id] || { name: '', amount: '', side: 'a' }; }
+  setEntry(id, patch) { this.setState(s => ({ entries: { ...s.entries, [id]: { ...this.entry(id), ...patch } } })); }
+  cut() { return Math.min(20, Math.max(0, this.props.commission ?? 0)) / 100; }
+  who() { return String(this.state.organizer || '').trim() || '—'; }
+  rateOf(name) {
+    const r = this.state.rates[name];
+    const v = r === undefined ? (this.props.commission ?? 5) : r;
+    return Math.min(50, Math.max(0, Number(String(v).replace(',', '.')) || 0));
+  }
+  rate() { return this.rateOf(this.who()); }
+  feeOf(b) { return b.amount * (b.rate === undefined ? this.rateOf(b.by || '—') : b.rate) / 100; }
+
+  /* pot partagé : la cote d'un camp = pot total / mises de ce camp. cote fixe : 2,00 partout. */
+  odds(f, side) {
+    const pot = f.bets.reduce((t, b) => t + b.amount, 0);
+    const on = f.bets.filter(b => b.side === side).reduce((t, b) => t + b.amount, 0);
+    if (this.state.mode === 'fixe') return 2;
+    if (!on) return 0;
+    return Math.max(1, pot / on);
+  }
+
+  addBet(f) {
+    const e = this.entry(f.id), amount = this.parse(e.amount);
+    if (!e.name.trim()) return this.toast('Indique le nom du parieur');
+    if (!amount) return this.toast('Indique la somme misée');
+    this.setState(s => ({
+      fights: s.fights.map(x => x.id !== f.id ? x : { ...x, bets: [...x.bets, { id: 'b' + Date.now(), name: e.name.trim(), amount, side: e.side, by: s.organizer.trim() || '—', rate: this.rate() }] }),
+      entries: { ...s.entries, [f.id]: { name: '', amount: '', side: e.side } }
+    }));
+    this.toast(e.name.trim() + ' · ' + this.n(amount) + ' 両 sur ' + f[e.side]);
+  }
+
+  renderVals() {
+    const s = this.state, fixe = s.mode === 'fixe';
+    const pot = f => f.bets.reduce((t, b) => t + b.amount, 0);
+    const open = s.fights.filter(f => !f.winner);
+    const done = s.fights.filter(f => f.winner);
+
+    const names = [...new Set(s.fights.flatMap(f => f.bets.map(b => b.name)))];
+    const ledger = names.map(name => {
+      let staked = 0, paid = 0, live = 0;
+      s.fights.forEach(f => f.bets.filter(b => b.name === name).forEach(b => {
+        if (!f.winner) { live += b.amount; return; }
+        staked += b.amount;
+        if (b.side === f.winner) paid += b.amount * this.odds({ ...f }, b.side);
+      }));
+      return { name, staked: this.n(staked) + ' 両', paid: this.n(paid) + ' 両', net: this.sign(paid - staked) + ' 両', live: live ? this.n(live) + ' 両' : '—', color: paid - staked >= 0 ? 'var(--color-accent-300)' : 'var(--color-neutral-400)', _n: paid - staked };
+    }).sort((x, y) => y._n - x._n);
+
+    let tStaked = 0, tPaid = 0;
+    done.forEach(f => f.bets.forEach(b => { tStaked += b.amount; if (b.side === f.winner) tPaid += b.amount * this.odds(f, b.side); }));
+    const allBets = s.fights.flatMap(f => f.bets);
+    const totalFees = allBets.reduce((t, b) => t + this.feeOf(b), 0);
+    const organizers = [...new Set(allBets.map(b => b.by || '—'))].map(name => {
+      const mine = allBets.filter(b => (b.by || '—') === name);
+      return {
+        name, count: String(mine.length),
+        rate: this.rateOf(name).toString().replace('.', ',') + ' %',
+        staked: this.n(mine.reduce((t, b) => t + b.amount, 0)) + ' 両',
+        fees: this.n(mine.reduce((t, b) => t + this.feeOf(b), 0)) + ' 両',
+        _f: mine.reduce((t, b) => t + this.feeOf(b), 0)
+      };
+    }).sort((x, y) => y._f - x._f);
+
+    return {
+      inPlay: this.n(open.reduce((t, f) => t + pot(f), 0)),
+      openCount: String(open.length),
+      isCarnet: s.view === 'carnet', isBilan: s.view === 'bilan', isHisto: s.view === 'histo',
+      navItems: [['carnet', 'Carnet', 'ph ph-boxing-glove'], ['histo', 'Historique', 'ph ph-clock-counter-clockwise'], ['bilan', 'Bilan', 'ph ph-scales']].map(([id, label, icon]) => ({
+        label, icon, go: () => this.setState({ view: id }),
+        color: s.view === id ? 'var(--color-accent)' : 'var(--color-text)',
+        bg: s.view === id ? 'color-mix(in srgb, var(--color-accent) 12%, transparent)' : 'transparent'
+      })),
+      histoStats: [
+        { label: 'Combats réglés', value: String(done.length), color: 'var(--color-text)' },
+        { label: 'Misé', value: this.n(tStaked) + ' 両', color: 'var(--color-text)' },
+        { label: 'Payé aux gagnants', value: this.n(tPaid) + ' 両', color: 'var(--color-accent-300)' },
+        { label: 'Parts organisateurs', value: this.n(done.reduce((t, f) => t + f.bets.reduce((u, b) => u + this.feeOf(b), 0), 0)) + ' 両', color: 'var(--color-accent-300)' }
+      ],
+      ledgerStats: [
+        { label: 'Parieurs', value: String(names.length), color: 'var(--color-text)' },
+        { label: 'Misé (réglé)', value: this.n(tStaked) + ' 両', color: 'var(--color-text)' },
+        { label: 'Payé', value: this.n(tPaid) + ' 両', color: 'var(--color-accent-300)' },
+        { label: 'Part organisateurs', value: this.n(totalFees) + ' 両', color: 'var(--color-accent-300)' }
+      ],
+      modeNote: fixe
+        ? 'Cote fixe à 2,00 : chaque pari gagnant rapporte le double de la mise. La part de l\'organisateur qui encaisse se prélève à côté, à son propre taux.'
+        : 'Le pot est partagé entre les gagnants, au prorata des mises. Chaque organisateur prend sa part à son propre taux, sans toucher à la mise en jeu.',
+      organizer: s.organizer,
+      setOrganizer: e => this.setState({ organizer: e.target.value }),
+      feeInput: s.rates[this.who()] === undefined ? String(this.props.commission ?? 5) : s.rates[this.who()],
+      setFee: e => this.setState({ rates: { ...s.rates, [this.who()]: e.target.value } }),
+      who: this.who(),
+      organizers,
+      modes: [['pot', 'Partage du pot'], ['fixe', 'Cote fixe 2,00']].map(([id, label]) => ({
+        label, on: s.mode === id, set: () => this.setState({ mode: id }),
+        color: s.mode === id ? 'var(--color-accent)' : 'inherit',
+        ring: s.mode === id ? 'inset 0 0 0 1px var(--color-accent)' : 'none'
+      })),
+      draft: {
+        a: s.draft.a, b: s.draft.b,
+        setA: e => this.setState({ draft: { ...s.draft, a: e.target.value } }),
+        setB: e => this.setState({ draft: { ...s.draft, b: e.target.value } }),
+        create: () => {
+          const { a, b } = s.draft;
+          if (!a.trim() || !b.trim()) return this.toast('Indique les deux noms');
+          this.setState({ fights: [{ id: 'f' + Date.now(), a: a.trim(), b: b.trim(), created: "à l'instant", winner: null, bets: [] }, ...s.fights], draft: { a: '', b: '' } });
+          this.toast('Combat ouvert — ' + a.trim() + ' vs ' + b.trim());
+        }
+      },
+      noOpen: open.length === 0,
+      openFights: open.map(f => {
+        const e = this.entry(f.id), total = pot(f);
+        const sides = ['a', 'b'].map(side => {
+          const bets = f.bets.filter(b => b.side === side);
+          const on = bets.reduce((t, b) => t + b.amount, 0);
+          const c = this.odds(f, side);
+          return {
+            name: f[side], odds: c ? this.o(c) : '—',
+            summary: on ? this.n(on) + ' 両 misés · ' + bets.length + (bets.length > 1 ? ' paris' : ' pari') : 'aucune mise',
+            border: e.side === side ? 'var(--color-accent-700)' : 'var(--color-divider)',
+            empty: bets.length === 0,
+            bets: bets.map(b => ({
+              name: b.name, amount: this.n(b.amount), win: c ? this.n(b.amount * c) : '—',
+              by: 'pris par ' + (b.by || '—') + ' · part ' + this.n(this.feeOf(b)) + ' 両',
+              remove: () => { this.setState({ fights: s.fights.map(x => x.id !== f.id ? x : { ...x, bets: x.bets.filter(y => y.id !== b.id) }) }); this.toast('Pari de ' + b.name + ' retiré'); }
+            }))
+          };
+        });
+        return {
+          created: f.created, pot: this.n(total),
+          fees: this.n(f.bets.reduce((t, b) => t + this.feeOf(b), 0)),
+          myFees: this.n(f.bets.filter(b => (b.by || '—') === this.who()).reduce((t, b) => t + this.feeOf(b), 0)),
+          betCount: f.bets.length + (f.bets.length > 1 ? ' paris' : ' pari'),
+          sides,
+          entry: {
+            name: e.name, amount: e.amount,
+            setName: ev => this.setEntry(f.id, { name: ev.target.value }),
+            setAmount: ev => this.setEntry(f.id, { amount: ev.target.value }),
+            picks: ['a', 'b'].map(side => ({
+              label: f[side], group: 'pick-' + f.id, on: e.side === side,
+              set: () => this.setEntry(f.id, { side }),
+              color: e.side === side ? 'var(--color-accent)' : 'inherit',
+              ring: e.side === side ? 'inset 0 0 0 1px var(--color-accent)' : 'none'
+            })),
+            add: () => this.addBet(f),
+            ...(() => {
+              const amt = this.parse(e.amount);
+              if (!amt) return { hasPreview: false };
+              const onSide = f.bets.filter(b => b.side === e.side).reduce((t, b) => t + b.amount, 0);
+              const c = fixe ? 2 : (total + amt) / (onSide + amt);
+              const ret = amt * c;
+              return {
+                hasPreview: true,
+                previewLabel: 'Si ' + f[e.side] + ' gagne, ' + (e.name.trim() || 'ce parieur') + ' touche',
+                previewOdds: this.o(c), previewNet: this.sign(ret - amt), previewReturn: this.n(ret),
+                previewFee: this.n(amt * this.rate() / 100)
+              };
+            })()
+          },
+          confirming: s.confirming === f.id, idle: s.confirming !== f.id,
+          hint: total ? 'Le pot de ' + this.n(total) + ' 両 sera réparti aussitôt.' : 'Aucun pari enregistré pour l\'instant.',
+          winners: ['a', 'b'].map(side => ({
+            label: f[side],
+            pick: () => { this.setState({ fights: s.fights.map(x => x.id === f.id ? { ...x, winner: side } : x), confirming: null, openDone: { ...s.openDone, [f.id]: true } }); this.toast(f[side] + ' déclaré vainqueur'); }
+          })),
+          startConfirm: () => this.setState({ confirming: f.id }),
+          cancelConfirm: () => this.setState({ confirming: null }),
+          remove: () => { this.setState({ fights: s.fights.filter(x => x.id !== f.id) }); this.toast('Combat supprimé'); },
+          addTest: () => {
+            const nums = s.fights.flatMap(x => x.bets).map(b => /^Test (\d+)$/.exec(b.name)).filter(Boolean).map(m => Number(m[1]));
+            const num = (nums.length ? Math.max(...nums) : 0) + 1;
+            const amount = 10000 * (1 + num % 3);
+            const sumA = f.bets.filter(b => b.side === 'a').reduce((t, b) => t + b.amount, 0);
+            const side = sumA <= total - sumA ? 'a' : 'b';
+            this.setState({ fights: s.fights.map(x => x.id !== f.id ? x : { ...x, bets: [...x.bets, { id: 't' + Date.now(), name: 'Test ' + num, amount, side, by: s.organizer.trim() || '—', rate: this.rate() }] }) });
+            this.toast('Test ' + num + ' · ' + this.n(amount) + ' 両 sur ' + f[side]);
+          }
+        };
+      }),
+      noDone: done.length === 0,
+      doneFights: done.map(f => {
+        const w = f.winner, l = w === 'a' ? 'b' : 'a';
+        const c = this.odds(f, w);
+        const winners = f.bets.filter(b => b.side === w);
+        return {
+          winnerName: f[w], loserName: f[l], created: f.created, pot: this.n(pot(f)),
+          fees: this.n(f.bets.reduce((t, b) => t + this.feeOf(b), 0)),
+          paidCount: winners.length + (winners.length > 1 ? ' gagnants' : ' gagnant'),
+          open: !!s.openDone[f.id], toggleLabel: s.openDone[f.id] ? 'Masquer' : 'Détail',
+          chevron: s.openDone[f.id] ? 'ph-caret-up' : 'ph-caret-down',
+          toggle: () => this.setState({ openDone: { ...s.openDone, [f.id]: !s.openDone[f.id] } }),
+          payouts: f.bets.map(b => {
+            const won = b.side === w, payv = won ? b.amount * c : 0;
+            return {
+              name: b.name, on: f[b.side], stake: this.n(b.amount) + ' 両',
+              by: b.by || '—',
+              pay: won ? this.n(payv) + ' 両' : '—',
+              net: this.sign(payv - b.amount) + ' 両',
+              color: won ? 'var(--color-accent-300)' : this.muted()
+            };
+          }),
+          reopen: () => { this.setState({ fights: s.fights.map(x => x.id === f.id ? { ...x, winner: null } : x) }); this.toast('Combat rouvert'); }
+        };
+      }),
+      ledger, noLedger: ledger.length === 0,
+      hasToast: !!s.toast, toast: s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>

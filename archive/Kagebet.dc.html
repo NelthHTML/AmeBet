@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/nocturne-f7850bc9-8642-4a96-b32a-ed72a08233d3/styles.css">
+  <script src="_ds/nocturne-f7850bc9-8642-4a96-b32a-ed72a08233d3/_ds_bundle.js"></script>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+  <script src="./image-slot.js"></script>
+  <style>
+    body { margin: 0; background: var(--color-bg); }
+    @keyframes kb-pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.82); } }
+    @keyframes kb-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    input[type=range] { accent-color: var(--color-accent); }
+    a { color: var(--color-accent); }
+    a:hover { color: var(--color-accent-300); }
+  </style>
+</helmet>
+<div style="min-height:100vh;background:radial-gradient(1100px 520px at 12% -6%, var(--color-accent-900), transparent 68%),var(--color-bg);color:var(--color-text);font-family:var(--font-body);font-size:15px">
+
+  <header class="nav" style="position:sticky;top:0;z-index:30;min-width:1240px;padding:var(--space-3) var(--space-8);gap:var(--space-6);background:color-mix(in srgb, var(--color-bg) 86%, transparent);backdrop-filter:blur(12px)" style-after="content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(to right,transparent,var(--color-divider) 48px,var(--color-divider) calc(100% - 48px),transparent)">
+    <div class="nav-brand" style="display:flex;align-items:baseline;gap:8px;margin-right:var(--space-4)">
+      <span style="letter-spacing:-0.02em">KAGE<span style="color:var(--color-accent)">BET</span></span>
+      <span style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent)">arène shinobi</span>
+    </div>
+    <nav style="display:flex;align-items:center;gap:2px;margin-right:auto;flex:none">
+      <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="6">
+        <button type="button" onClick="{{ n.go }}" style="display:flex;align-items:center;gap:7px;padding:7px 11px;border:0;border-radius:var(--radius-md);background:{{ n.bg }};font:inherit;font-size:14px;font-weight:500;white-space:nowrap;cursor:pointer;color:{{ n.color }}" style-hover="background:color-mix(in srgb, var(--color-text) 7%, transparent)">
+          <i class="{{ n.icon }}" style="font-size:16px"></i>{{ n.label }}
+        </button>
+      </sc-for>
+    </nav>
+    <div style="display:flex;align-items:center;gap:var(--space-3)">
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 8px 6px 12px;border-radius:var(--radius-md);box-shadow:var(--shadow-sm);background:var(--color-surface)">
+        <span style="font-size:15px;color:var(--color-accent)">両</span>
+        <div style="line-height:1.1">
+          <div style="font-size:15px;font-weight:600;font-variant-numeric:tabular-nums">{{ balanceStr }}</div>
+          <div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent)">ryos disponibles</div>
+        </div>
+        <button type="button" class="btn btn-primary" onClick="{{ goWallet }}" style="padding:4px 9px;margin-left:4px"><i class="ph-bold ph-plus" style="font-size:13px"></i></button>
+      </div>
+      <div style="display:flex;align-items:center;gap:9px">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--color-accent-800);color:var(--color-accent-100);display:grid;place-items:center;font-size:12px;font-weight:600">SK</div>
+        <div style="line-height:1.15">
+          <div style="font-size:13px;font-weight:500">Shin Kurogane</div>
+          <div style="font-size:10px;color:var(--color-accent)">Rang Jonin · #7</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main style="display:flex;align-items:flex-start;gap:var(--space-8);max-width:1560px;min-width:1240px;margin:0 auto;padding:var(--space-8) var(--space-8) 80px">
+    <div style="flex:1;min-width:0">
+
+      <sc-if value="{{ isArena }}" hint-placeholder-val="{{ true }}">
+        <section data-screen-label="Arène">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:var(--space-6);margin-bottom:var(--space-6)">
+            <div>
+              <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent);margin-bottom:6px">Tournoi des Cinq Villages · Jour 3</div>
+              <h1 style="font-size:38px;margin:0">L'arène est ouverte</h1>
+              <p style="margin:6px 0 0;font-size:14px;color:color-mix(in srgb, var(--color-text) 55%, transparent);max-width:56ch;text-wrap:pretty">Les cotes bougent seules : le moteur recalcule à chaque mise encaissée. Clique une cote pour la charger dans ton ticket.</p>
+            </div>
+            <div style="display:flex;gap:var(--space-2)">
+              <button type="button" class="btn btn-secondary" onClick="{{ goAdmin }}"><i class="ph ph-sliders-horizontal" style="font-size:15px"></i>Moteur de cotes</button>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-6);padding:var(--space-4) 0;margin-bottom:var(--space-8);background:linear-gradient(to right,transparent,var(--color-divider) 48px,var(--color-divider) calc(100% - 48px),transparent) no-repeat bottom / 100% 1px">
+            <sc-for list="{{ marketStats }}" as="s" hint-placeholder-count="4">
+              <div>
+                <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent);margin-bottom:5px">{{ s.label }}</div>
+                <div style="font-size:26px;font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:-0.02em">{{ s.value }}</div>
+                <div style="font-size:11px;color:{{ s.hintColor }}">{{ s.hint }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ hasLive }}" hint-placeholder-val="{{ true }}">
+            <div style="position:relative;border-radius:var(--radius-lg);background:linear-gradient(148deg, var(--color-accent-900), var(--color-surface) 62%);box-shadow:var(--shadow-md);padding:var(--space-6);margin-bottom:var(--space-8);overflow:hidden">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:var(--space-4)">
+                <span style="width:8px;height:8px;border-radius:50%;background:var(--color-accent);animation:kb-pulse 1.4s infinite"></span>
+                <span style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent)">En direct</span>
+                <span style="font-size:12px;color:color-mix(in srgb, var(--color-text) 50%, transparent)">{{ live.event }}</span>
+                <span style="margin-left:auto;font-size:12px;font-variant-numeric:tabular-nums;color:color-mix(in srgb, var(--color-text) 60%, transparent)">{{ live.roundLabel }} · {{ live.clock }}</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:var(--space-6)">
+                <div>
+                  <div style="font-size:28px;font-weight:500;letter-spacing:-0.02em">{{ live.a.name }}</div>
+                  <div style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ live.a.meta }}</div>
+                  <button type="button" onClick="{{ live.pickA }}" style="margin-top:var(--space-4);display:flex;align-items:center;gap:var(--space-4);width:100%;max-width:280px;padding:11px 14px;border-radius:var(--radius-md);background:{{ live.aBg }};border:1px solid {{ live.aBorder }};cursor:pointer;font:inherit;color:var(--color-text);text-align:left" style-hover="background:color-mix(in srgb, var(--color-accent) 14%, transparent)">
+                    <span style="font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--color-accent)">{{ live.aOdds }}</span>
+                    <span style="flex:1;font-size:11px;line-height:1.3;color:color-mix(in srgb, var(--color-text) 60%, transparent)">Vainqueur<br>{{ live.aProb }} implicite</span>
+                    <span style="font-size:12px;font-variant-numeric:tabular-nums;color:{{ live.aMoveColor }}">{{ live.aMove }}</span>
+                  </button>
+                </div>
+                <div style="text-align:center">
+                  <svg viewBox="0 0 320 96" style="width:320px;height:96px;overflow:visible">
+                    <line x1="0" y1="48" x2="320" y2="48" stroke="var(--color-neutral-800)" stroke-width="1"></line>
+                    <polyline points="{{ live.pathB }}" fill="none" stroke="var(--color-neutral-500)" stroke-width="1.5" stroke-linejoin="round"></polyline>
+                    <polyline points="{{ live.pathA }}" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linejoin="round"></polyline>
+                  </svg>
+                  <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent)">mouvement des cotes · 5 dernières min</div>
+                </div>
+                <div style="text-align:right">
+                  <div style="font-size:28px;font-weight:500;letter-spacing:-0.02em">{{ live.b.name }}</div>
+                  <div style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ live.b.meta }}</div>
+                  <button type="button" onClick="{{ live.pickB }}" style="margin-top:var(--space-4);display:flex;align-items:center;gap:var(--space-4);width:100%;max-width:280px;margin-left:auto;padding:11px 14px;border-radius:var(--radius-md);background:{{ live.bBg }};border:1px solid {{ live.bBorder }};cursor:pointer;font:inherit;color:var(--color-text);text-align:left" style-hover="background:color-mix(in srgb, var(--color-accent) 14%, transparent)">
+                    <span style="font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--color-accent)">{{ live.bOdds }}</span>
+                    <span style="flex:1;font-size:11px;line-height:1.3;color:color-mix(in srgb, var(--color-text) 60%, transparent)">Vainqueur<br>{{ live.bProb }} implicite</span>
+                    <span style="font-size:12px;font-variant-numeric:tabular-nums;color:{{ live.bMoveColor }}">{{ live.bMove }}</span>
+                  </button>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:var(--space-4);margin-top:var(--space-6)">
+                <button type="button" class="btn btn-ghost" onClick="{{ live.open }}">Fiche du combat<i class="ph-bold ph-arrow-right" style="font-size:13px"></i></button>
+                <span style="margin-left:auto;font-size:12px;font-variant-numeric:tabular-nums;color:color-mix(in srgb, var(--color-text) 50%, transparent)">volume {{ live.volume }} 両 · {{ live.betCount }} paris</span>
+              </div>
+            </div>
+          </sc-if>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-4)">
+            <h2 style="font-size:18px;margin:0">Marchés ouverts</h2>
+            <div class="seg">
+              <sc-for list="{{ filters }}" as="fl" hint-placeholder-count="4">
+                <label class="seg-opt" style="color:{{ fl.color }};box-shadow:{{ fl.ring }}">
+                  <input type="radio" name="kb-filter" checked="{{ fl.on }}" onChange="{{ fl.set }}">{{ fl.label }}
+                </label>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:var(--space-3)">
+            <sc-for list="{{ rows }}" as="f" hint-placeholder-count="4">
+              <article style="border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);padding:var(--space-4) var(--space-6);opacity:{{ f.dim }}">
+                <div style="display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-3)">
+                  <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ f.event }}</span>
+                  <span class="tag" style="background:{{ f.statusBg }};color:{{ f.statusColor }};font-size:10px;letter-spacing:.08em;text-transform:uppercase">{{ f.statusLabel }}</span>
+                  <span style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;font-variant-numeric:tabular-nums;color:color-mix(in srgb, var(--color-text) 55%, transparent)"><i class="ph ph-clock" style="font-size:14px"></i>{{ f.when }}</span>
+                </div>
+                <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;align-items:center;gap:var(--space-4)">
+                  <button type="button" onClick="{{ f.pickA }}" disabled="{{ f.locked }}" style="display:flex;align-items:center;gap:var(--space-4);padding:10px 13px;border-radius:var(--radius-md);background:{{ f.aBg }};border:1px solid {{ f.aBorder }};cursor:pointer;font:inherit;color:var(--color-text);text-align:left" style-hover="background:color-mix(in srgb, var(--color-accent) 12%, transparent)">
+                    <span style="flex:1;min-width:0">
+                      <span style="display:block;font-size:16px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ f.a.name }}</span>
+                      <span style="display:block;font-size:11px;color:color-mix(in srgb, var(--color-text) 50%, transparent)">{{ f.a.meta }}</span>
+                    </span>
+                    <span style="text-align:right">
+                      <span style="display:block;font-size:21px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--color-accent);line-height:1.1">{{ f.aOdds }}</span>
+                      <span style="display:block;font-size:11px;font-variant-numeric:tabular-nums;color:{{ f.aMoveColor }}">{{ f.aMove }} {{ f.aProb }}</span>
+                    </span>
+                  </button>
+                  <button type="button" onClick="{{ f.pickB }}" disabled="{{ f.locked }}" style="display:flex;align-items:center;gap:var(--space-4);padding:10px 13px;border-radius:var(--radius-md);background:{{ f.bBg }};border:1px solid {{ f.bBorder }};cursor:pointer;font:inherit;color:var(--color-text);text-align:left" style-hover="background:color-mix(in srgb, var(--color-accent) 12%, transparent)">
+                    <span style="flex:1;min-width:0">
+                      <span style="display:block;font-size:16px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ f.b.name }}</span>
+                      <span style="display:block;font-size:11px;color:color-mix(in srgb, var(--color-text) 50%, transparent)">{{ f.b.meta }}</span>
+                    </span>
+                    <span style="text-align:right">
+                      <span style="display:block;font-size:21px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--color-accent);line-height:1.1">{{ f.bOdds }}</span>
+                      <span style="display:block;font-size:11px;font-variant-numeric:tabular-nums;color:{{ f.bMoveColor }}">{{ f.bMove }} {{ f.bProb }}</span>
+                    </span>
+                  </button>
+                  <div style="display:flex;align-items:center;gap:2px">
+                    <button type="button" class="btn btn-ghost" onClick="{{ f.toggle }}" style="font-size:12px">Détails<i class="ph-bold {{ f.chevron }}" style="font-size:12px"></i></button>
+                    <button type="button" class="btn btn-secondary" onClick="{{ f.open }}" style="padding:6px 8px"><i class="ph ph-arrow-up-right" style="font-size:14px"></i></button>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:var(--space-4);margin-top:var(--space-3)">
+                  <div style="flex:1;height:4px;border-radius:2px;background:var(--color-neutral-900);overflow:hidden;display:flex">
+                    <div style="width:{{ f.aSharePct }}%;background:var(--color-accent);transition:width .5s ease"></div>
+                    <div style="flex:1;background:var(--color-neutral-700)"></div>
+                  </div>
+                  <span style="font-size:11px;font-variant-numeric:tabular-nums;color:color-mix(in srgb, var(--color-text) 55%, transparent);white-space:nowrap">{{ f.aShareLabel }} / {{ f.bShareLabel }} · volume {{ f.volume }} 両</span>
+                </div>
+                <sc-if value="{{ f.expanded }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:var(--space-4);padding-top:var(--space-4);background:linear-gradient(to right,transparent,var(--color-divider) 48px,var(--color-divider) calc(100% - 48px),transparent) no-repeat top / 100% 1px;animation:kb-rise .18s ease">
+                    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:var(--space-4)">
+                      <sc-for list="{{ f.metrics }}" as="m" hint-placeholder-count="5">
+                        <div>
+                          <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent);margin-bottom:3px">{{ m.k }}</div>
+                          <div style="font-size:15px;font-weight:500;font-variant-numeric:tabular-nums">{{ m.v }}</div>
+                          <div style="font-size:10px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ m.n }}</div>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <div style="margin-top:var(--space-4);font-size:12px;font-family:var(--font-body);color:var(--color-accent-300);font-variant-numeric:tabular-nums">{{ f.formula }}</div>
+                  </div>
+                </sc-if>
+              </article>
+            </sc-for>
+          </div>
+        </section>
+      </sc-if>
+
+      <sc-if value="{{ isFight }}" hint-placeholder-val="{{ false }}">
+        <section data-screen-label="Combat">
+          <button type="button" class="btn btn-ghost" onClick="{{ goArena }}" style="margin-bottom:var(--space-4)"><i class="ph-bold ph-arrow-left" style="font-size:13px"></i>Retour à l'arène</button>
+          <div style="display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-4)">
+            <span style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-accent)">{{ detail.event }}</span>
+            <span class="tag" style="background:{{ detail.statusBg }};color:{{ detail.statusColor }};font-size:10px;letter-spacing:.08em;text-transform:uppercase">{{ detail.statusLabel }}</span>
+            <span style="margin-left:auto;font-size:12px;font-variant-numeric:tabular-nums;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ detail.when }} · volume {{ detail.volume }} 両</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin-bottom:var(--space-6)">
+            <div style="border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);overflow:hidden">
+              <div class="lighten" style="position:relative;height:200px;background:var(--color-neutral-900)">
+                <image-slot id="kb-portrait-a" shape="rect" placeholder="Portrait du combattant rouge (fond sombre)"></image-slot>
+              </div>
+              <div style="padding:var(--space-4) var(--space-6)">
+                <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-accent);margin-bottom:4px">Coin rouge</div>
+                <h2 style="font-size:26px;margin:0 0 2px">{{ detail.a.name }}</h2>
+                <div style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ detail.a.meta }} · {{ detail.a.style }}</div>
+                <button type="button" onClick="{{ detail.pickA }}" disabled="{{ detail.locked }}" style="margin-top:var(--space-4);display:flex;align-items:center;gap:var(--space-4);width:100%;padding:12px 14px;border-radius:var(--radius-md);background:{{ detail.aBg }};border:1px solid {{ detail.aBorder }};cursor:pointer;font:inherit;color:var(--color-text);text-align:left" style-hover="background:color-mix(in srgb, var(--color-accent) 12%, transparent)">
+                  <span style="font-size:26px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--color-accent)">{{ detail.aOdds }}</span>
+                  <span style="flex:1;font-size:11px;line-height:1.35;color:color-mix(in srgb, var(--color-text) 60%, transparent)">Vainqueur — {{ detail.aProb }} implicite<br>{{ detail.aShareLabel }} des mises</span>
+                  <span style="font-size:13px;font-variant-numeric:tabular-nums;color:{{ detail.aMoveColor }}">{{ detail.aMove }}</span>
+                </button>
+              </div>
+            </div>
+            <div style="border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);overflow:hidden">
+              <div class="lighten" style="position:relative;height:200px;background:var(--color-neutral-900)">
+                <image-slot id="kb-portrait-b" shape="rect" placeholder="Portrait du combattant bleu (fond sombre)"></image-slot>
+              </div>
+              <div style="padding:var(--space-4) var(--space-6)">
+                <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-accent);margin-bottom:4px">Coin bleu</div>
+                <h2 style="font-size:26px;margin:0 0 2px">{{ detail.b.name }}</h2>
+                <div style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ detail.b.meta }} · {{ detail.b.style }}</div>
+                <button type="button" onClick="{{ detail.pickB }}" disabled="{{ detail.locked }}" style="margin-top:var(--space-4);display:flex;align-items:center;gap:var(--space-4);width:100%;padding:12px 14px;border-radius:var(--radius-md);background:{{ detail.bBg }};border:1px solid {{ detail.bBorder }};cursor:pointer;font:inherit;color:var(--color-text);text-align:left" style-hover="background:color-mix(in srgb, var(--color-accent) 12%, transparent)">
+                  <span style="font-size:26px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--color-accent)">{{ detail.bOdds }}</span>
+                  <span style="flex:1;font-size:11px;line-height:1.35;color:color-mix(in srgb, var(--color-text) 60%, transparent)">Vainqueur — {{ detail.bProb }} implicite<br>{{ detail.bShareLabel }} des mises</span>
+                  <span style="font-size:13px;font-variant-numeric:tabular-nums;color:{{ detail.bMoveColor }}">{{ detail.bMove }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div style="border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);padding:var(--space-6);margin-bottom:var(--space-4)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-4)">
+              <h3 style="font-size:16px;margin:0">Mouvement du marché</h3>
+              <span style="font-size:11px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">recalcul auto toutes les 2 s · mode {{ engine.modeLabel }}</span>
+            </div>
+            <svg viewBox="0 0 760 160" style="width:100%;height:160px">
+              <line x1="0" y1="40" x2="760" y2="40" stroke="var(--color-neutral-900)" stroke-width="1"></line>
+              <line x1="0" y1="80" x2="760" y2="80" stroke="var(--color-neutral-800)" stroke-width="1"></line>
+              <line x1="0" y1="120" x2="760" y2="120" stroke="var(--color-neutral-900)" stroke-width="1"></line>
+              <polyline points="{{ detail.bigPathB }}" fill="none" stroke="var(--color-neutral-500)" stroke-width="1.75" stroke-linejoin="round"></polyline>
+              <polyline points="{{ detail.bigPathA }}" fill="none" stroke="var(--color-accent)" stroke-width="2.25" stroke-linejoin="round"></polyline>
+            </svg>
+            <div style="display:flex;gap:var(--space-6);margin-top:var(--space-3);font-size:11px">
+              <span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:2px;background:var(--color-accent)"></span>{{ detail.a.name }}</span>
+              <span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:2px;background:var(--color-neutral-500)"></span>{{ detail.b.name }}</span>
+              <span style="margin-left:auto;color:color-mix(in srgb, var(--color-text) 55%, transparent);font-variant-numeric:tabular-nums">amplitude {{ detail.range }}</span>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1.1fr .9fr;gap:var(--space-4)">
+            <div style="border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);padding:var(--space-6)">
+              <h3 style="font-size:16px;margin:0 0 var(--space-4)">Comparatif</h3>
+              <div style="display:flex;flex-direction:column;gap:var(--space-4)">
+                <sc-for list="{{ detail.compare }}" as="c" hint-placeholder-count="5">
+                  <div>
+                    <div style="display:flex;justify-content:space-between;font-size:12px;font-variant-numeric:tabular-nums;margin-bottom:5px">
+                      <span style="font-weight:500">{{ c.av }}</span>
+                      <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ c.k }}</span>
+                      <span style="font-weight:500">{{ c.bv }}</span>
+                    </div>
+                    <div style="display:flex;gap:3px;height:5px">
+                      <div style="flex:1;display:flex;justify-content:flex-end;background:var(--color-neutral-900);border-radius:2px 0 0 2px;overflow:hidden"><div style="width:{{ c.aPct }}%;background:var(--color-accent)"></div></div>
+                      <div style="flex:1;background:var(--color-neutral-900);border-radius:0 2px 2px 0;overflow:hidden"><div style="width:{{ c.bPct }}%;background:var(--color-neutral-500)"></div></div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);padding:var(--space-6)">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-4)">
+                <h3 style="font-size:16px;margin:0">Comment la cote est calculée</h3>
+                <button type="button" class="btn btn-ghost" onClick="{{ toggleMath }}" style="font-size:12px">{{ mathLabel }}<i class="ph-bold {{ mathChevron }}" style="font-size:12px"></i></button>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:var(--space-3)">
+                <sc-for list="{{ detail.pipeline }}" as="p" hint-placeholder-count="4">
+                  <div style="display:flex;align-items:baseline;gap:var(--space-4)">
+                    <span style="width:18px;height:18px;flex:none;border-radius:50%;border:1px solid var(--color-accent-700);color:var(--color-accent);font-size:10px;display:grid;place-items:center">{{ p.i }}</span>
+                    <span style="flex:1;font-size:13px">{{ p.label }}</span>
+                    <span style="font-size:14px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--color-accent-300)">{{ p.value }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <sc-if value="{{ showMath }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:var(--space-4);padding-top:var(--space-4);background:linear-gradient(to right,transparent,var(--color-divider) 48px,var(--color-divider) calc(100% - 48px),transparent) no-repeat top / 100% 1px;font-size:12px;line-height:1.7;color:color-mix(in srgb, var(--color-text) 65%, transparent);animation:kb-rise .18s ease">
+                  <div style="color:var(--color-accent-300);font-variant-numeric:tabular-nums">{{ detail.formula }}</div>
+                  <p style="margin:var(--space-3) 0 0;text-wrap:pretty">{{ detail.mathNote }}</p>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </section>
+      </sc-if>
+
+      <sc-if value="{{ isBets }}" hint-placeholder-val="{{ false }}">
+        <section data-screen-label="Mes paris">
+          <h1 style="font-size:32px;margin:0 0 var(--space-6)">Mes paris</h1>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-4);margin-bottom:var(--space-8)">
+            <sc-for list="{{ betStats }}" as="s" hint-placeholder-count="4">
+              <div style="border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);padding:var(--space-4) var(--space-6)">
+                <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent);margin-bottom:5px">{{ s.label }}</div>
+                <div style="font-size:24px;font-weight:500;font-variant-numeric:tabular-nums;color:{{ s.color }}">{{ s.value }}</div>
+                <div style="font-size:11px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ s.hint }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <table class="table">
+            <thead><tr><th>Combat</th><th>Pari</th><th style="text-align:right">Cote</th><th style="text-align:right">Mise</th><th style="text-align:right">Retour</th><th style="text-align:right">Statut</th></tr></thead>
+            <tbody>
+              <sc-for list="{{ betRows }}" as="b" hint-placeholder-count="5">
+                <tr>
+                  <td><div style="font-size:14px">{{ b.fight }}</div><div style="font-size:11px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ b.placed }}</div></td>
+                  <td style="font-size:13px">{{ b.pick }}</td>
+                  <td style="text-align:right;font-variant-numeric:tabular-nums">{{ b.odds }}</td>
+                  <td style="text-align:right;font-variant-numeric:tabular-nums">{{ b.stake }}</td>
+                  <td style="text-align:right;font-variant-numeric:tabular-nums;color:{{ b.returnColor }}">{{ b.ret }}</td>
+                  <td style="text-align:right"><span class="tag" style="background:{{ b.tagBg }};color:{{ b.tagColor }};font-size:10px;letter-spacing:.06em;text-transform:uppercase">{{ b.status }}</span></td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </section>
+      </sc-if>
+
+      <sc-if value="{{ isWallet }}" hint-placeholder-val="{{ false }}">
+        <section data-screen-label="Portefeuille">
+          <h1 style="font-size:32px;margin:0 0 var(--space-6)">Portefeuille</h1>
+          <div style="border-radius:var(--radius-lg);background:linear-gradient(140deg, var(--color-accent-900), var(--color-surface) 60%);box-shadow:var(--shadow-md);padding:var(--space-8);margin-bottom:var(--space-6);display:flex;align-items:flex-end;justify-content:space-between;gap:var(--space-8)">
+            <div>
+              <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent);margin-bottom:8px">Solde disponible</div>
+              <div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:46px;font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:-0.03em">{{ balanceStr }}</span><span style="font-size:20px;color:var(--color-accent)">両</span></div>
+              <div style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent);margin-top:4px">{{ lockedStr }} 両 engagés sur {{ openCount }} paris en cours</div>
+            </div>
+            <div style="display:flex;gap:var(--space-6);text-align:right">
+              <sc-for list="{{ walletStats }}" as="w" hint-placeholder-count="3">
+                <div>
+                  <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent);margin-bottom:4px">{{ w.label }}</div>
+                  <div style="font-size:20px;font-weight:500;font-variant-numeric:tabular-nums;color:{{ w.color }}">{{ w.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4);margin-bottom:var(--space-8)">
+            <sc-for list="{{ walletActions }}" as="a" hint-placeholder-count="3">
+              <div style="border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);padding:var(--space-6)">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:var(--space-3)"><i class="{{ a.icon }}" style="font-size:18px;color:var(--color-accent)"></i><h3 style="font-size:15px;margin:0">{{ a.title }}</h3></div>
+                <p style="font-size:12px;margin:0 0 var(--space-4);color:color-mix(in srgb, var(--color-text) 55%, transparent);min-height:34px;text-wrap:pretty">{{ a.note }}</p>
+                <div class="field"><label>{{ a.fieldLabel }}</label><input class="input" type="text" value="{{ a.value }}" onChange="{{ a.onInput }}" placeholder="{{ a.placeholder }}"></div>
+                <button type="button" class="btn btn-primary btn-block" onClick="{{ a.submit }}">{{ a.cta }}</button>
+              </div>
+            </sc-for>
+          </div>
+          <h2 style="font-size:18px;margin:0 0 var(--space-3)">Mouvements</h2>
+          <table class="table">
+            <thead><tr><th>Opération</th><th>Détail</th><th style="text-align:right">Montant</th><th style="text-align:right">Solde après</th></tr></thead>
+            <tbody>
+              <sc-for list="{{ txRows }}" as="t" hint-placeholder-count="6">
+                <tr>
+                  <td><div style="display:flex;align-items:center;gap:8px"><i class="{{ t.icon }}" style="font-size:15px;color:{{ t.color }}"></i>{{ t.kind }}</div></td>
+                  <td style="font-size:13px;color:color-mix(in srgb, var(--color-text) 60%, transparent)">{{ t.detail }}</td>
+                  <td style="text-align:right;font-variant-numeric:tabular-nums;color:{{ t.color }}">{{ t.amount }}</td>
+                  <td style="text-align:right;font-variant-numeric:tabular-nums;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ t.after }}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </section>
+      </sc-if>
+
+      <sc-if value="{{ isBoard }}" hint-placeholder-val="{{ false }}">
+        <section data-screen-label="Classement">
+          <h1 style="font-size:32px;margin:0 0 4px">Classement des parieurs</h1>
+          <p style="font-size:14px;color:color-mix(in srgb, var(--color-text) 55%, transparent);margin:0 0 var(--space-8)">Saison du Tournoi des Cinq Villages · bilan net en ryos</p>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4);margin-bottom:var(--space-8)">
+            <sc-for list="{{ podium }}" as="p" hint-placeholder-count="3">
+              <div style="border-radius:var(--radius-md);background:{{ p.bg }};box-shadow:var(--shadow-sm);padding:var(--space-6);display:flex;flex-direction:column;gap:var(--space-2)">
+                <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:32px;font-weight:500;color:var(--color-accent);font-variant-numeric:tabular-nums">{{ p.rank }}</span><span class="tag tag-neutral" style="font-size:10px">{{ p.village }}</span></div>
+                <div style="font-size:19px;font-weight:500">{{ p.name }}</div>
+                <div style="font-size:24px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--color-accent-300)">{{ p.profit }}</div>
+                <div style="font-size:11px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ p.detail }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <table class="table">
+            <thead><tr><th style="width:52px">#</th><th>Parieur</th><th>Village</th><th style="text-align:right">Paris</th><th style="text-align:right">Réussite</th><th style="text-align:right">ROI</th><th style="text-align:right">Bilan</th></tr></thead>
+            <tbody>
+              <sc-for list="{{ boardRows }}" as="r" hint-placeholder-count="8">
+                <tr style="background-color:{{ r.you }}">
+                  <td style="font-variant-numeric:tabular-nums;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ r.rank }}</td>
+                  <td style="font-weight:500">{{ r.name }}</td>
+                  <td style="font-size:13px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ r.village }}</td>
+                  <td style="text-align:right;font-variant-numeric:tabular-nums">{{ r.bets }}</td>
+                  <td style="text-align:right;font-variant-numeric:tabular-nums">{{ r.hit }}</td>
+                  <td style="text-align:right;font-variant-numeric:tabular-nums">{{ r.roi }}</td>
+                  <td style="text-align:right;font-variant-numeric:tabular-nums;color:{{ r.color }}">{{ r.profit }}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </section>
+      </sc-if>
+
+      <sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ false }}">
+        <section data-screen-label="Admin">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:var(--space-6);margin-bottom:var(--space-6)">
+            <div>
+              <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent);margin-bottom:6px">Console du bookmaker</div>
+              <h1 style="font-size:32px;margin:0">Régie</h1>
+            </div>
+            <div class="seg">
+              <sc-for list="{{ adminTabs }}" as="t" hint-placeholder-count="4">
+                <label class="seg-opt" style="color:{{ t.color }};box-shadow:{{ t.ring }}"><input type="radio" name="kb-admin" checked="{{ t.on }}" onChange="{{ t.set }}"><i class="{{ t.icon }}" style="font-size:14px"></i>{{ t.label }}</label>
+              </sc-for>
+            </div>
+          </div>
+
+          <sc-if value="{{ adminCards }}" hint-placeholder-val="{{ true }}">
+            <div style="border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);padding:var(--space-6);margin-bottom:var(--space-6)">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:var(--space-4)">
+                <i class="ph ph-lightning" style="font-size:18px;color:var(--color-accent)"></i>
+                <h3 style="font-size:16px;margin:0">Ouvrir un marché</h3>
+                <span style="font-size:11px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">six champs, la cote d'ouverture se calcule seule</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1.4fr .9fr .6fr 1.4fr .9fr .6fr;gap:var(--space-3);align-items:end">
+                <div class="field"><label>Coin rouge</label><input class="input" type="text" value="{{ draft.nameA }}" onChange="{{ draft.setNameA }}" placeholder="Nom du combattant"></div>
+                <div class="field"><label>Village</label><select class="input" value="{{ draft.villageA }}" onChange="{{ draft.setVillageA }}"><sc-for list="{{ villages }}" as="v" hint-placeholder-count="6"><option value="{{ v }}">{{ v }}</option></sc-for></select></div>
+                <div class="field"><label>Cote ELO</label><input class="input" type="number" value="{{ draft.ratingA }}" onChange="{{ draft.setRatingA }}"></div>
+                <div class="field"><label>Coin bleu</label><input class="input" type="text" value="{{ draft.nameB }}" onChange="{{ draft.setNameB }}" placeholder="Nom du combattant"></div>
+                <div class="field"><label>Village</label><select class="input" value="{{ draft.villageB }}" onChange="{{ draft.setVillageB }}"><sc-for list="{{ villages }}" as="v" hint-placeholder-count="6"><option value="{{ v }}">{{ v }}</option></sc-for></select></div>
+                <div class="field"><label>Cote ELO</label><input class="input" type="number" value="{{ draft.ratingB }}" onChange="{{ draft.setRatingB }}"></div>
+              </div>
+              <div style="display:grid;grid-template-columns:1.4fr .9fr .6fr 1.4fr .9fr .6fr;gap:var(--space-3);align-items:end;margin-top:var(--space-3)">
+                <div class="field" style="grid-column:span 2"><label>Événement</label><input class="input" type="text" value="{{ draft.event }}" onChange="{{ draft.setEvent }}"></div>
+                <div class="field"><label>Départ</label><input class="input" type="text" value="{{ draft.when }}" onChange="{{ draft.setWhen }}"></div>
+                <div class="field"><label>Amorce de liquidité (両)</label><input class="input" type="number" value="{{ draft.seed }}" onChange="{{ draft.setSeed }}"></div>
+                <div style="grid-column:span 2;display:flex;align-items:center;gap:var(--space-4)">
+                  <div style="flex:1;font-size:12px;font-variant-numeric:tabular-nums;color:var(--color-accent-300)">{{ draft.preview }}</div>
+                  <button type="button" class="btn btn-primary" onClick="{{ draft.create }}"><i class="ph-bold ph-plus-circle" style="font-size:14px"></i>Ouvrir</button>
+                </div>
+              </div>
+            </div>
+            <table class="table">
+              <thead><tr><th>Combat</th><th>Événement</th><th style="text-align:right">Volume</th><th style="text-align:right">Cotes</th><th style="text-align:right">Pire cas</th><th>Statut</th><th style="text-align:right">Actions</th></tr></thead>
+              <tbody>
+                <sc-for list="{{ adminRows }}" as="r" hint-placeholder-count="6">
+                  <tr>
+                    <td><div style="font-size:14px;font-weight:500">{{ r.title }}</div><div style="font-size:11px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ r.when }}</div></td>
+                    <td style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ r.event }}</td>
+                    <td style="text-align:right;font-variant-numeric:tabular-nums">{{ r.volume }}</td>
+                    <td style="text-align:right;font-variant-numeric:tabular-nums;color:var(--color-accent-300)">{{ r.odds }}</td>
+                    <td style="text-align:right;font-variant-numeric:tabular-nums;color:{{ r.worstColor }}">{{ r.worst }}</td>
+                    <td><span class="tag" style="background:{{ r.statusBg }};color:{{ r.statusColor }};font-size:10px;letter-spacing:.06em;text-transform:uppercase">{{ r.statusLabel }}</span></td>
+                    <td style="text-align:right"><div style="display:flex;gap:2px;justify-content:flex-end">
+                      <button type="button" class="btn btn-secondary" onClick="{{ r.toggleHold }}" style="padding:5px 9px;font-size:12px">{{ r.holdLabel }}</button>
+                      <button type="button" class="btn btn-primary" onClick="{{ r.settle }}" disabled="{{ r.settled }}" style="padding:5px 9px;font-size:12px">Régler</button>
+                    </div></td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </sc-if>
+
+          <sc-if value="{{ adminEngine }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;grid-template-columns:.95fr 1.05fr;gap:var(--space-4);margin-bottom:var(--space-6)">
+              <div style="border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);padding:var(--space-6)">
+                <h3 style="font-size:16px;margin:0 0 var(--space-2)">Moteur de cotes</h3>
+                <p style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent);margin:0 0 var(--space-4);text-wrap:pretty">Le mode choisi s'applique à tous les marchés ouverts, immédiatement.</p>
+                <div style="display:flex;flex-direction:column;gap:var(--space-2);margin-bottom:var(--space-6)">
+                  <sc-for list="{{ engineModes }}" as="m" hint-placeholder-count="3">
+                    <label style="display:flex;gap:var(--space-4);padding:var(--space-3) var(--space-4);border-radius:var(--radius-md);cursor:pointer;border:1px solid {{ m.border }};background:{{ m.bg }}" style-hover="background:color-mix(in srgb, var(--color-text) 5%, transparent)">
+                      <input type="radio" name="kb-mode" checked="{{ m.on }}" onChange="{{ m.set }}" style="position:absolute;opacity:0;width:0;height:0">
+                      <span style="width:16px;height:16px;flex:none;margin-top:3px;border-radius:50%;border:1.5px solid {{ m.dotBorder }};background:{{ m.dotFill }};box-shadow:{{ m.dotInner }}"></span>
+                      <span style="flex:1">
+                        <span style="display:block;font-size:14px;font-weight:500">{{ m.label }}</span>
+                        <span style="display:block;font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent);text-wrap:pretty">{{ m.note }}</span>
+                      </span>
+                    </label>
+                  </sc-for>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:var(--space-6)">
+                  <sc-for list="{{ engineSliders }}" as="s" hint-placeholder-count="4">
+                    <div style="opacity:{{ s.dim }}">
+                      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+                        <span style="font-size:12px;color:color-mix(in srgb, var(--color-text) 70%, transparent)">{{ s.label }}</span>
+                        <span style="font-size:15px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--color-accent)">{{ s.display }}</span>
+                      </div>
+                      <input type="range" min="{{ s.min }}" max="{{ s.max }}" step="{{ s.step }}" value="{{ s.value }}" onChange="{{ s.set }}" onInput="{{ s.set }}" style="width:100%">
+                      <div style="font-size:11px;color:color-mix(in srgb, var(--color-text) 55%, transparent);margin-top:3px">{{ s.note }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);padding:var(--space-6)">
+                <h3 style="font-size:16px;margin:0 0 var(--space-2)">Simulation — {{ sim.title }}</h3>
+                <p style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent);margin:0 0 var(--space-4)">Ce que donnerait chaque mode sur ce marché, avec les mises actuelles.</p>
+                <table class="table" style="font-size:13px">
+                  <thead><tr><th>Mode</th><th style="text-align:right">{{ sim.aName }}</th><th style="text-align:right">{{ sim.bName }}</th><th style="text-align:right">Retour joueur</th></tr></thead>
+                  <tbody>
+                    <sc-for list="{{ sim.rows }}" as="r" hint-placeholder-count="3">
+                      <tr style="background-color:{{ r.active }}">
+                        <td style="color:{{ r.color }}">{{ r.mode }}</td>
+                        <td style="text-align:right;font-variant-numeric:tabular-nums">{{ r.oa }}</td>
+                        <td style="text-align:right;font-variant-numeric:tabular-nums">{{ r.ob }}</td>
+                        <td style="text-align:right;font-variant-numeric:tabular-nums">{{ r.payout }}</td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+                <div style="margin-top:var(--space-6);padding-top:var(--space-4);background:linear-gradient(to right,transparent,var(--color-divider) 48px,var(--color-divider) calc(100% - 48px),transparent) no-repeat top / 100% 1px">
+                  <h4 style="font-size:13px;margin:0 0 var(--space-3)">Exposition de la maison</h4>
+                  <div style="display:flex;flex-direction:column;gap:var(--space-4)">
+                    <sc-for list="{{ riskRows }}" as="k" hint-placeholder-count="5">
+                      <div>
+                        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+                          <span>{{ k.title }}</span>
+                          <span style="font-variant-numeric:tabular-nums;color:{{ k.color }}">{{ k.worst }}</span>
+                        </div>
+                        <div style="height:5px;border-radius:2px;background:var(--color-neutral-900);overflow:hidden"><div style="width:{{ k.pct }}%;height:100%;background:{{ k.barColor }}"></div></div>
+                        <div style="font-size:10px;color:color-mix(in srgb, var(--color-text) 55%, transparent);margin-top:3px;font-variant-numeric:tabular-nums">{{ k.note }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ adminAccounts }}" hint-placeholder-val="{{ false }}">
+            <table class="table">
+              <thead><tr><th>Compte</th><th>Village</th><th style="text-align:right">Solde</th><th style="text-align:right">Engagé</th><th>Statut</th><th style="text-align:right">Ajustement</th></tr></thead>
+              <tbody>
+                <sc-for list="{{ accountRows }}" as="u" hint-placeholder-count="6">
+                  <tr>
+                    <td><div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:var(--color-neutral-800);color:var(--color-neutral-100);display:grid;place-items:center;font-size:11px">{{ u.initials }}</span><span><span style="display:block;font-size:14px;font-weight:500">{{ u.name }}</span><span style="display:block;font-size:11px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ u.joined }}</span></span></div></td>
+                    <td style="font-size:13px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ u.village }}</td>
+                    <td style="text-align:right;font-variant-numeric:tabular-nums">{{ u.balance }}</td>
+                    <td style="text-align:right;font-variant-numeric:tabular-nums;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ u.locked }}</td>
+                    <td><span class="tag" style="background:{{ u.tagBg }};color:{{ u.tagColor }};font-size:10px;letter-spacing:.06em;text-transform:uppercase">{{ u.status }}</span></td>
+                    <td style="text-align:right"><div style="display:flex;gap:2px;justify-content:flex-end">
+                      <button type="button" class="btn btn-secondary" onClick="{{ u.credit }}" style="padding:5px 9px;font-size:12px">+10 k</button>
+                      <button type="button" class="btn btn-secondary" onClick="{{ u.debit }}" style="padding:5px 9px;font-size:12px">−10 k</button>
+                      <button type="button" class="btn btn-ghost" onClick="{{ u.toggle }}" style="font-size:12px">{{ u.toggleLabel }}</button>
+                    </div></td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </sc-if>
+
+          <sc-if value="{{ adminDisputes }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:var(--space-3)">
+              <sc-for list="{{ disputeRows }}" as="d" hint-placeholder-count="3">
+                <div style="border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);padding:var(--space-6);display:flex;gap:var(--space-6);align-items:flex-start">
+                  <i class="{{ d.icon }}" style="font-size:20px;color:var(--color-accent);margin-top:2px"></i>
+                  <div style="flex:1">
+                    <div style="display:flex;align-items:center;gap:var(--space-3);margin-bottom:4px">
+                      <span style="font-size:15px;font-weight:500">{{ d.title }}</span>
+                      <span class="tag" style="background:{{ d.tagBg }};color:{{ d.tagColor }};font-size:10px;letter-spacing:.06em;text-transform:uppercase">{{ d.state }}</span>
+                      <span style="margin-left:auto;font-size:11px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ d.when }}</span>
+                    </div>
+                    <p style="font-size:13px;margin:0 0 var(--space-3);color:color-mix(in srgb, var(--color-text) 65%, transparent);text-wrap:pretty">{{ d.body }}</p>
+                    <div style="display:flex;gap:var(--space-6);font-size:11px;font-variant-numeric:tabular-nums;color:color-mix(in srgb, var(--color-text) 55%, transparent)">
+                      <span>{{ d.meta1 }}</span><span>{{ d.meta2 }}</span>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:var(--space-2);width:170px">
+                    <button type="button" class="btn btn-primary" onClick="{{ d.resolve }}" disabled="{{ d.done }}">{{ d.primary }}</button>
+                    <button type="button" class="btn btn-secondary" onClick="{{ d.refund }}" disabled="{{ d.done }}">Annuler &amp; rembourser</button>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </section>
+      </sc-if>
+
+    </div>
+
+    <sc-if value="{{ showSlip }}" hint-placeholder-val="{{ true }}">
+      <aside style="width:330px;flex:none;position:sticky;top:96px" data-screen-label="Ticket">
+        <div style="border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-md);overflow:hidden">
+          <div style="display:flex;align-items:center;gap:8px;padding:var(--space-4) var(--space-6);background:linear-gradient(to right,transparent,var(--color-divider) 48px,var(--color-divider) calc(100% - 48px),transparent) no-repeat bottom / 100% 1px">
+            <i class="ph ph-ticket" style="font-size:17px;color:var(--color-accent)"></i>
+            <h3 style="font-size:15px;margin:0">Ticket de pari</h3>
+            <span style="margin-left:auto;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ slip.badge }}</span>
+          </div>
+          <sc-if value="{{ slip.empty }}" hint-placeholder-val="{{ true }}">
+            <div style="padding:var(--space-8) var(--space-6);text-align:center">
+              <i class="ph ph-cursor-click" style="font-size:26px;color:var(--color-neutral-600)"></i>
+              <p style="font-size:13px;margin:var(--space-3) 0 0;color:color-mix(in srgb, var(--color-text) 50%, transparent);text-wrap:pretty">Choisis une cote dans l'arène pour ouvrir un ticket.</p>
+            </div>
+          </sc-if>
+          <sc-if value="{{ slip.filled }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:var(--space-6)">
+              <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ slip.event }}</div>
+              <div style="font-size:17px;font-weight:500;margin:4px 0 2px">{{ slip.pick }}</div>
+              <div style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ slip.matchup }}</div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin:var(--space-4) 0;padding:var(--space-3) var(--space-4);border-radius:var(--radius-md);border:1px solid var(--color-accent-800);background:color-mix(in srgb, var(--color-accent) 7%, transparent)">
+                <span style="font-size:11px;color:color-mix(in srgb, var(--color-text) 60%, transparent)">Cote verrouillée</span>
+                <span style="font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--color-accent)">{{ slip.odds }}</span>
+              </div>
+              <div class="field"><label>Mise en ryos</label><input class="input" type="text" value="{{ slip.stake }}" onChange="{{ slip.setStake }}" placeholder="0"></div>
+              <div style="display:flex;gap:5px;margin:var(--space-2) 0 var(--space-4)">
+                <sc-for list="{{ slip.chips }}" as="c" hint-placeholder-count="4">
+                  <button type="button" class="btn btn-secondary" onClick="{{ c.set }}" style="flex:1;padding:5px 0;font-size:12px">{{ c.label }}</button>
+                </sc-for>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:7px;font-size:12px;padding-top:var(--space-3);background:linear-gradient(to right,transparent,var(--color-divider) 48px,var(--color-divider) calc(100% - 48px),transparent) no-repeat top / 100% 1px">
+                <div style="display:flex;justify-content:space-between"><span style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Mise</span><span style="font-variant-numeric:tabular-nums">{{ slip.stakeStr }} 両</span></div>
+                <div style="display:flex;justify-content:space-between"><span style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Gain net potentiel</span><span style="font-variant-numeric:tabular-nums">{{ slip.netStr }} 両</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:500"><span>Retour total</span><span style="font-variant-numeric:tabular-nums;color:var(--color-accent)">{{ slip.returnStr }} 両</span></div>
+              </div>
+              <button type="button" class="btn btn-primary btn-block" onClick="{{ slip.place }}" disabled="{{ slip.disabled }}" style="margin-top:var(--space-4);padding:9px 0">{{ slip.cta }}</button>
+              <div style="font-size:11px;text-align:center;margin-top:7px;color:{{ slip.noteColor }}">{{ slip.note }}</div>
+            </div>
+          </sc-if>
+        </div>
+
+        <div style="margin-top:var(--space-4);border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);padding:var(--space-4) var(--space-6)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
+            <h4 style="font-size:13px;margin:0">Paris en cours</h4>
+            <button type="button" class="btn btn-ghost" onClick="{{ goBets }}" style="font-size:11px">Tout voir</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:var(--space-3)">
+            <sc-for list="{{ openBets }}" as="b" hint-placeholder-count="2">
+              <div style="display:flex;align-items:baseline;gap:var(--space-3);font-size:12px">
+                <span style="flex:1;min-width:0"><span style="display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ b.pick }}</span><span style="display:block;font-size:10px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ b.stake }} 両 @ {{ b.odds }}</span></span>
+                <span style="font-variant-numeric:tabular-nums;color:var(--color-accent-300)">{{ b.ret }}</span>
+              </div>
+            </sc-for>
+            <sc-if value="{{ noOpenBets }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">Aucun pari en cours.</div>
+            </sc-if>
+          </div>
+        </div>
+      </aside>
+    </sc-if>
+  </main>
+
+  <sc-if value="{{ settleOpen }}" hint-placeholder-val="{{ false }}">
+    <div class="dialog-backdrop" style="z-index:60">
+      <div class="dialog">
+        <div class="dialog-title">Régler le combat</div>
+        <div class="dialog-body">{{ settle.title }} — désigne le vainqueur. Les paris gagnants sont payés à la cote verrouillée, les tickets perdants sont soldés.</div>
+        <div style="display:flex;flex-direction:column;gap:var(--space-2)">
+          <button type="button" class="btn btn-primary btn-block" onClick="{{ settle.winA }}" style="justify-content:space-between;padding:10px 14px"><span>{{ settle.aName }}</span><span style="font-variant-numeric:tabular-nums">{{ settle.aOdds }}</span></button>
+          <button type="button" class="btn btn-primary btn-block" onClick="{{ settle.winB }}" style="justify-content:space-between;padding:10px 14px"><span>{{ settle.bName }}</span><span style="font-variant-numeric:tabular-nums">{{ settle.bOdds }}</span></button>
+        </div>
+        <div style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent);font-variant-numeric:tabular-nums">{{ settle.note }}</div>
+        <div class="dialog-actions"><button type="button" class="btn btn-secondary" onClick="{{ settle.close }}">Fermer</button></div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:70;display:flex;align-items:center;gap:10px;padding:11px 18px;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-lg);animation:kb-rise .2s ease">
+      <i class="{{ toastIcon }}" style="font-size:17px;color:var(--color-accent)"></i>
+      <span style="font-size:13px">{{ toast }}</span>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;engineMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;mutuel&quot;,&quot;hybride&quot;,&quot;maker&quot;],&quot;default&quot;:&quot;hybride&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Moteur de cotes&quot;},&quot;houseMargin&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0,&quot;max&quot;:15,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;%&quot;,&quot;default&quot;:6,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Moteur de cotes&quot;},&quot;poolWeight&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0,&quot;max&quot;:100,&quot;step&quot;:5,&quot;unit&quot;:&quot;%&quot;,&quot;default&quot;:55,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Moteur de cotes&quot;},&quot;startBalance&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;min&quot;:0,&quot;max&quot;:20000000,&quot;step&quot;:50000,&quot;default&quot;:1482500,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Compte joueur&quot;}}">
+class Component extends DCLogic {
+  state = {
+    view: 'arena',
+    fightId: 'f2',
+    filter: 'all',
+    adminTab: 'cards',
+    expanded: { f2: true },
+    showMath: true,
+    settleId: null,
+    toast: null,
+    tick: 0,
+    balance: this.props.startBalance ?? 1482500,
+    engine: {
+      mode: this.props.engineMode ?? 'hybride',
+      margin: this.props.houseMargin ?? 6,
+      poolWeight: this.props.poolWeight ?? 55,
+      maxStake: 250000,
+      minStake: 500
+    },
+    slip: { fightId: 'f2', side: 'a', stake: 25000 },
+    draft: { nameA: '', villageA: 'Feuille', ratingA: 1500, nameB: '', villageB: 'Sable', ratingB: 1500, event: 'Tournoi des Cinq Villages · Quarts', when: 'ce soir 21:30', seed: 200000 },
+    wallet: { deposit: '50000', withdraw: '', transfer: '' },
+    fights: [
+      { id: 'f1', event: 'Tournoi des Cinq Villages · Quart 1', status: 'live', round: 2, clock: 192, manualP: 0.62,
+        a: { name: 'Kaen Rikudō', village: 'Feuille', rank: 'Jonin', rating: 1712, pool: 742000, style: 'Ninjutsu de feu', w: 24, l: 5, ko: 17, fin: 71, form: 82 },
+        b: { name: 'Suiga Mizuhara', village: 'Brume', rank: 'Jonin', rating: 1668, pool: 498000, style: 'Suiton défensif', w: 21, l: 7, ko: 9, fin: 43, form: 68 },
+        hist: [], winner: null, bets: 318 },
+      { id: 'f2', event: 'Tournoi des Cinq Villages · Quart 2', status: 'open', startsIn: 'dans 18 min', manualP: 0.55,
+        a: { name: 'Tsurara Yukimura', village: 'Brume', rank: 'ANBU', rating: 1784, pool: 612000, style: 'Hyōton', w: 31, l: 4, ko: 22, fin: 77, form: 91 },
+        b: { name: 'Gyōdō Kurotsuki', village: 'Pierre', rank: 'Jonin', rating: 1655, pool: 388000, style: 'Doton lourd', w: 26, l: 11, ko: 14, fin: 52, form: 64 },
+        hist: [], winner: null, bets: 204 },
+      { id: 'f3', event: 'Tournoi des Cinq Villages · Quart 3', status: 'open', startsIn: 'dans 42 min', manualP: 0.48,
+        a: { name: 'Raiden Amagumo', village: 'Foudre', rank: 'Chunin', rating: 1520, pool: 214000, style: 'Raiton rapide', w: 15, l: 6, ko: 11, fin: 68, form: 74 },
+        b: { name: 'Hazan du Désert', village: 'Sable', rank: 'Chunin', rating: 1548, pool: 268000, style: 'Fūton', w: 17, l: 5, ko: 8, fin: 46, form: 79 },
+        hist: [], winner: null, bets: 141 },
+      { id: 'f4', event: 'Tournoi des Cinq Villages · Quart 4', status: 'open', startsIn: 'ce soir 21:00', manualP: 0.44,
+        a: { name: 'Shinrei Otoha', village: 'Son', rank: 'Jonin', rating: 1602, pool: 158000, style: 'Genjutsu sonore', w: 19, l: 9, ko: 6, fin: 31, form: 61 },
+        b: { name: 'Kagerō Fūma', village: 'Feuille', rank: 'ANBU', rating: 1741, pool: 302000, style: 'Kenjutsu', w: 28, l: 3, ko: 19, fin: 68, form: 88 },
+        hist: [], winner: null, bets: 97 },
+      { id: 'f5', event: 'Barrage · Repêchage', status: 'held', startsIn: 'suspendu', manualP: 0.5,
+        a: { name: 'Byakuen Tōno', village: 'Pierre', rank: 'Jonin', rating: 1588, pool: 96000, style: 'Taijutsu', w: 14, l: 8, ko: 5, fin: 36, form: 55 },
+        b: { name: 'Ren Ashikaga', village: 'Sable', rank: 'Jonin', rating: 1596, pool: 88000, style: 'Fuinjutsu', w: 16, l: 7, ko: 7, fin: 44, form: 59 },
+        hist: [], winner: null, bets: 52 },
+      { id: 'f6', event: 'Tournoi des Cinq Villages · Huitième 8', status: 'settled', startsIn: 'terminé', manualP: 0.5,
+        a: { name: 'Ibuki Nagare', village: 'Feuille', rank: 'Chunin', rating: 1544, pool: 402000, style: 'Suiton', w: 18, l: 6, ko: 9, fin: 50, form: 72 },
+        b: { name: 'Kōsuke Tanma', village: 'Foudre', rank: 'Chunin', rating: 1502, pool: 288000, style: 'Raiton', w: 15, l: 9, ko: 6, fin: 40, form: 58 },
+        hist: [], winner: 'a', bets: 233 }
+    ],
+    bets: [
+      { id: 'b1', fightId: 'f1', side: 'a', stake: 45000, odds: 1.68, status: 'open', placed: 'il y a 12 min' },
+      { id: 'b2', fightId: 'f2', side: 'b', stake: 120000, odds: 2.05, status: 'open', placed: 'il y a 34 min' },
+      { id: 'b3', fightId: 'f6', side: 'a', stake: 80000, odds: 1.9, status: 'won', placed: 'hier 22:04' },
+      { id: 'b4', fightId: 'f6', side: 'b', stake: 30000, odds: 2.35, status: 'lost', placed: 'hier 21:47' }
+    ],
+    accounts: [
+      { id: 'u1', name: 'Shin Kurogane', village: 'Feuille', balance: 1482500, locked: 165000, status: 'actif', joined: 'membre depuis 14 mois' },
+      { id: 'u2', name: 'Ayame Hozuki', village: 'Brume', balance: 3204000, locked: 480000, status: 'actif', joined: 'membre depuis 2 ans' },
+      { id: 'u3', name: 'Genma Ōtsuki', village: 'Pierre', balance: 812000, locked: 92000, status: 'actif', joined: 'membre depuis 7 mois' },
+      { id: 'u4', name: 'Rurika Sendō', village: 'Sable', balance: 2660000, locked: 305000, status: 'plafonné', joined: 'membre depuis 3 ans' },
+      { id: 'u5', name: 'Tobishi Kanna', village: 'Foudre', balance: 148000, locked: 0, status: 'gelé', joined: 'membre depuis 2 mois' },
+      { id: 'u6', name: 'Mokuren Ise', village: 'Son', balance: 528000, locked: 41000, status: 'actif', joined: 'membre depuis 9 mois' }
+    ],
+    disputes: [
+      { id: 'd1', title: 'Quart 2 — arrêt médical contesté', state: 'ouvert', when: 'il y a 6 min', icon: 'ph ph-first-aid',
+        body: "Le coin bleu réclame un no-contest : l'arrêt est tombé pendant une prise de chakra médical, hors décompte de l'arbitre. 41 tickets concernés.",
+        meta1: '41 tickets · 386 000 両 engagés', meta2: 'décision attendue avant le round suivant', primary: 'Valider le résultat', done: false },
+      { id: 'd2', title: 'Barrage — mise hors plafond', state: 'à vérifier', when: 'il y a 22 min', icon: 'ph ph-warning-diamond',
+        body: 'Un compte a placé 420 000 両 alors que le plafond du marché est à 250 000 両. La différence doit être remboursée ou le plafond relevé.',
+        meta1: '1 ticket · 420 000 両', meta2: 'compte Rurika Sendō · plafonné', primary: 'Relever le plafond', done: false }
+    ],
+    board: [
+      { rank: 1, name: 'Ayame Hozuki', village: 'Brume', bets: 214, hit: 61, roi: 34, profit: 4820000 },
+      { rank: 2, name: 'Rurika Sendō', village: 'Sable', bets: 178, hit: 57, roi: 28, profit: 3140000 },
+      { rank: 3, name: 'Genma Ōtsuki', village: 'Pierre', bets: 302, hit: 52, roi: 19, profit: 2260000 },
+      { rank: 4, name: 'Mokuren Ise', village: 'Son', bets: 96, hit: 55, roi: 17, profit: 1180000 },
+      { rank: 5, name: 'Kanata Yoi', village: 'Feuille', bets: 143, hit: 50, roi: 11, profit: 742000 },
+      { rank: 6, name: 'Tobishi Kanna', village: 'Foudre', bets: 88, hit: 48, roi: 6, profit: 288000 },
+      { rank: 7, name: 'Shin Kurogane', village: 'Feuille', bets: 64, hit: 47, roi: 4, profit: 152000, you: true },
+      { rank: 8, name: 'Hibana Kuzu', village: 'Sable', bets: 121, hit: 41, roi: -8, profit: -410000 }
+    ],
+    tx: [
+      { kind: 'Gain de pari', detail: 'Ibuki Nagare vainqueur @ 1.90', amount: 152000, after: 1482500, icon: 'ph ph-trophy' },
+      { kind: 'Mise', detail: 'Suiga Mizuhara — Quart 2', amount: -120000, after: 1330500, icon: 'ph ph-ticket' },
+      { kind: 'Mise', detail: 'Kaen Rikudō — Quart 1', amount: -45000, after: 1450500, icon: 'ph ph-ticket' },
+      { kind: 'Transfert reçu', detail: 'de Genma Ōtsuki', amount: 200000, after: 1495500, icon: 'ph ph-arrow-down-left' },
+      { kind: 'Recharge', detail: 'coffre du village · Feuille', amount: 500000, after: 1295500, icon: 'ph ph-vault' },
+      { kind: 'Pari perdu', detail: 'Kōsuke Tanma @ 2.35', amount: -30000, after: 795500, icon: 'ph ph-x-circle' }
+    ]
+  };
+
+  componentDidMount() {
+    this.timer = setInterval(() => this.tick(), 2000);
+    this.setState(s => ({ fights: s.fights.map(f => ({ ...f, hist: this.seedHist(f) })) }));
+  }
+  componentWillUnmount() { clearInterval(this.timer); }
+
+  seedHist(f) {
+    const out = []; let a = f.a.pool, b = f.b.pool;
+    for (let i = 0; i < 36; i++) {
+      const o = this.oddsOf({ ...f, a: { ...f.a, pool: a }, b: { ...f.b, pool: b } }, this.state.engine);
+      out.push([o.oa, o.ob]);
+      a *= 1 + (Math.random() - 0.5) * 0.05; b *= 1 + (Math.random() - 0.5) * 0.05;
+    }
+    return out;
+  }
+
+  tick() {
+    this.setState(s => ({
+      tick: s.tick + 1,
+      fights: s.fights.map(f => {
+        if (f.status !== 'open' && f.status !== 'live') return f;
+        const drift = () => 1 + (Math.random() - 0.48) * 0.035;
+        const na = { ...f.a, pool: Math.round(f.a.pool * drift()) };
+        const nb = { ...f.b, pool: Math.round(f.b.pool * drift()) };
+        const prev = this.oddsOf(f, s.engine);
+        const next = { ...f, a: na, b: nb, prev: [prev.oa, prev.ob], bets: f.bets + (Math.random() < 0.5 ? 1 : 0) };
+        if (f.status === 'live') next.clock = f.clock > 0 ? f.clock - 2 : 300;
+        const o = this.oddsOf(next, s.engine);
+        next.hist = [...(f.hist || []), [o.oa, o.ob]].slice(-36);
+        return next;
+      })
+    }));
+  }
+
+  /* — moteur — */
+  oddsOf(f, eng) {
+    const tot = f.a.pool + f.b.pool;
+    const shareA = tot > 0 ? f.a.pool / tot : 0.5;
+    const pStat = 1 / (1 + Math.pow(10, (f.b.rating - f.a.rating) / 400));
+    const w = eng.poolWeight / 100;
+    let p = eng.mode === 'mutuel' ? shareA : eng.mode === 'maker' ? f.manualP : pStat * (1 - w) + shareA * w;
+    p = Math.min(0.94, Math.max(0.06, p));
+    const m = eng.margin / 100;
+    return { p, pStat, shareA, tot, oa: Math.max(1.01, (1 / p) * (1 - m)), ob: Math.max(1.01, (1 / (1 - p)) * (1 - m)) };
+  }
+  fight(id) { return this.state.fights.find(f => f.id === id); }
+  n(v) { return Math.round(v).toLocaleString('fr-FR').replace(/\u202f|\u00a0/g, ' '); }
+  k(v) {
+    const a = Math.abs(v);
+    if (a >= 1e6) return (v / 1e6).toFixed(2).replace('.', ',') + ' M';
+    if (a >= 1e4) return Math.round(v / 1e3) + ' k';
+    return this.n(v);
+  }
+  sign(v) { return (v > 0 ? '+' : v < 0 ? '−' : '') + this.k(Math.abs(v)); }
+  o(v) { return v.toFixed(2).replace('.', ','); }
+  pc(v, d) { return (v * 100).toFixed(d === undefined ? 1 : d).replace('.', ',') + ' %'; }
+  ok() { return 'var(--color-accent-300)'; }
+  bad() { return 'var(--color-neutral-400)'; }
+  muted() { return 'color-mix(in srgb, var(--color-text) 55%, transparent)'; }
+
+  statusOf(f) {
+    if (f.status === 'live') return { statusLabel: 'en direct', statusBg: 'var(--color-accent-800)', statusColor: 'var(--color-accent-100)' };
+    if (f.status === 'held') return { statusLabel: 'suspendu', statusBg: 'var(--color-neutral-800)', statusColor: 'var(--color-neutral-200)' };
+    if (f.status === 'settled') return { statusLabel: 'réglé', statusBg: 'var(--color-neutral-900)', statusColor: 'var(--color-neutral-400)' };
+    return { statusLabel: 'ouvert', statusBg: 'transparent', statusColor: 'var(--color-accent)' };
+  }
+  move(cur, prev) {
+    const d = prev === undefined ? 0 : cur - prev;
+    if (Math.abs(d) < 0.005) return { txt: '–', col: this.muted() };
+    return { txt: (d > 0 ? '▲ ' : '▼ ') + this.o(Math.abs(d)), col: d > 0 ? 'var(--color-accent-300)' : 'var(--color-neutral-400)' };
+  }
+  sel(fid, side) { const s = this.state.slip; return s.fightId === fid && s.side === side; }
+  pickStyles(fid, side) {
+    const on = this.sel(fid, side);
+    return { bg: on ? 'color-mix(in srgb, var(--color-accent) 14%, transparent)' : 'transparent', border: on ? 'var(--color-accent)' : 'var(--color-divider)' };
+  }
+  clock(sec) { const m = Math.floor(sec / 60); return m + ':' + String(sec % 60).padStart(2, '0'); }
+  path(hist, idx, w, h) {
+    if (!hist || hist.length < 2) return '';
+    const vals = hist.flatMap(p => p);
+    const lo = Math.min(...vals), hi = Math.max(...vals), span = hi - lo || 1;
+    return hist.map((p, i) => (i / (hist.length - 1) * w).toFixed(1) + ',' + (h - (p[idx] - lo) / span * h * 0.86 - h * 0.07).toFixed(1)).join(' ');
+  }
+  toast(msg) { this.setState({ toast: msg }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast: null }), 2600); }
+  go(view) { return () => this.setState({ view, settleId: null }); }
+  pick(fid, side) {
+    return () => {
+      const f = this.fight(fid);
+      if (f.status === 'held' || f.status === 'settled') return this.toast('Marché suspendu — pari impossible');
+      this.setState({ slip: { fightId: fid, side, stake: this.state.slip.stake || 25000 } });
+    };
+  }
+  parse(v) { return Math.max(0, Math.round(Number(String(v).replace(/[^0-9]/g, '')) || 0)); }
+
+  place() {
+    const s = this.state, f = this.fight(s.slip.fightId);
+    const stake = this.parse(s.slip.stake);
+    const o = this.oddsOf(f, s.engine);
+    const odds = s.slip.side === 'a' ? o.oa : o.ob;
+    if (!stake || stake < s.engine.minStake) return this.toast('Mise minimum ' + this.n(s.engine.minStake) + ' 両');
+    if (stake > s.engine.maxStake) return this.toast('Plafond du marché : ' + this.n(s.engine.maxStake) + ' 両');
+    if (stake > s.balance) return this.toast('Solde insuffisant');
+    const side = s.slip.side;
+    this.setState({
+      balance: s.balance - stake,
+      bets: [{ id: 'b' + Date.now(), fightId: f.id, side, stake, odds: Number(odds.toFixed(2)), status: 'open', placed: "à l'instant" }, ...s.bets],
+      fights: s.fights.map(x => x.id !== f.id ? x : { ...x, bets: x.bets + 1, [side]: { ...x[side], pool: x[side].pool + stake } })
+    });
+    this.toast('Pari validé — ' + this.n(stake) + ' 両 @ ' + this.o(odds));
+  }
+
+  doSettle(winner) {
+    const s = this.state, f = this.fight(s.settleId);
+    let payout = 0;
+    const bets = s.bets.map(b => {
+      if (b.fightId !== f.id || b.status !== 'open') return b;
+      if (b.side === winner) { payout += b.stake * b.odds; return { ...b, status: 'won' }; }
+      return { ...b, status: 'lost' };
+    });
+    this.setState({
+      settleId: null, balance: s.balance + payout, bets,
+      fights: s.fights.map(x => x.id === f.id ? { ...x, status: 'settled', winner, startsIn: 'terminé' } : x)
+    });
+    this.toast(payout > 0 ? 'Combat réglé — ' + this.n(payout) + ' 両 crédités' : 'Combat réglé — aucun ticket gagnant');
+  }
+
+  renderVals() {
+    const s = this.state, eng = s.engine;
+    const modeLabel = { mutuel: 'Pari mutuel', hybride: 'Hybride', maker: 'Market maker' }[eng.mode];
+    const nav = [
+      ['arena', 'Arène', 'ph ph-boxing-glove'], ['fight', 'Combat', 'ph ph-crosshair'],
+      ['bets', 'Mes paris', 'ph ph-ticket'], ['wallet', 'Portefeuille', 'ph ph-vault'],
+      ['board', 'Classement', 'ph ph-ranking'], ['admin', 'Régie', 'ph ph-sliders-horizontal']
+    ];
+    const openBets = s.bets.filter(b => b.status === 'open');
+    const locked = openBets.reduce((t, b) => t + b.stake, 0);
+    const potential = openBets.reduce((t, b) => t + b.stake * b.odds, 0);
+    const settledBets = s.bets.filter(b => b.status !== 'open');
+    const netSettled = settledBets.reduce((t, b) => t + (b.status === 'won' ? b.stake * b.odds - b.stake : -b.stake), 0);
+    const stakedAll = s.bets.reduce((t, b) => t + b.stake, 0);
+
+    const dec = f => {
+      const o = this.oddsOf(f, eng), st = this.statusOf(f);
+      const ma = this.move(o.oa, f.prev && f.prev[0]), mb = this.move(o.ob, f.prev && f.prev[1]);
+      const pa = this.pickStyles(f.id, 'a'), pb = this.pickStyles(f.id, 'b');
+      const locked = f.status === 'held' || f.status === 'settled';
+      return {
+        ...f, ...st, o,
+        a: { ...f.a, meta: f.a.village + ' · ' + f.a.rank + ' · ' + f.a.w + '-' + f.a.l },
+        b: { ...f.b, meta: f.b.village + ' · ' + f.b.rank + ' · ' + f.b.w + '-' + f.b.l },
+        title: f.a.name + ' vs ' + f.b.name,
+        when: f.status === 'live' ? 'R' + f.round + ' · ' + this.clock(f.clock) : f.startsIn,
+        aOdds: this.o(o.oa), bOdds: this.o(o.ob),
+        aProb: this.pc(1 / o.oa, 0), bProb: this.pc(1 / o.ob, 0),
+        aMove: ma.txt, aMoveColor: ma.col, bMove: mb.txt, bMoveColor: mb.col,
+        aBg: pa.bg, aBorder: pa.border, bBg: pb.bg, bBorder: pb.border,
+        aSharePct: (o.shareA * 100).toFixed(1), aShareLabel: this.pc(o.shareA, 0), bShareLabel: this.pc(1 - o.shareA, 0),
+        volume: this.k(o.tot), dim: locked ? 0.62 : 1, locked,
+        expanded: !!s.expanded[f.id], chevron: s.expanded[f.id] ? 'ph-caret-up' : 'ph-caret-down',
+        pickA: this.pick(f.id, 'a'), pickB: this.pick(f.id, 'b'),
+        open: () => this.setState({ view: 'fight', fightId: f.id }),
+        toggle: () => this.setState({ expanded: { ...s.expanded, [f.id]: !s.expanded[f.id] } }),
+        formula: 'cote = (1 / p) × (1 − marge ' + eng.margin + ' %) · p = ' + this.pc(o.p) + ' · mode ' + modeLabel + (eng.mode === 'hybride' ? ' (' + (100 - eng.poolWeight) + ' % modèle / ' + eng.poolWeight + ' % mises)' : ''),
+        metrics: [
+          { k: 'Prob. modèle', v: this.pc(o.pStat), n: 'ELO ' + f.a.rating + ' vs ' + f.b.rating },
+          { k: 'Part des mises', v: this.pc(o.shareA), n: this.k(f.a.pool) + ' / ' + this.k(f.b.pool) + ' 両' },
+          { k: 'Prob. retenue', v: this.pc(o.p), n: 'après pondération' },
+          { k: 'Retour joueur', v: this.pc(1 - eng.margin / 100, 1), n: 'marge maison ' + eng.margin + ' %' },
+          { k: 'Tickets', v: this.n(f.bets), n: 'plafond ' + this.k(eng.maxStake) + ' 両' }
+        ]
+      };
+    };
+
+    const decorated = s.fights.map(dec);
+    const live = decorated.find(f => f.status === 'live');
+    const rows = decorated.filter(f => {
+      if (s.filter === 'open') return f.status === 'open';
+      if (s.filter === 'live') return f.status === 'live';
+      if (s.filter === 'settled') return f.status === 'settled' || f.status === 'held';
+      return true;
+    });
+    const detail = decorated.find(f => f.id === s.fightId) || decorated[0];
+
+    const cmp = (k, label, unit) => {
+      const av = detail[('a')][k], bv = detail['b'][k], m = Math.max(av, bv) || 1;
+      return { k: label, av: unit === '%' ? av + ' %' : this.n(av), bv: unit === '%' ? bv + ' %' : this.n(bv), aPct: (av / m * 100).toFixed(0), bPct: (bv / m * 100).toFixed(0) };
+    };
+
+    const sim = (() => {
+      const f = decorated.find(x => x.status === 'open') || detail;
+      const rows = ['mutuel', 'hybride', 'maker'].map(mode => {
+        const o = this.oddsOf(f, { ...eng, mode });
+        const on = mode === eng.mode;
+        return {
+          mode: { mutuel: 'Pari mutuel', hybride: 'Hybride', maker: 'Market maker' }[mode],
+          oa: this.o(o.oa), ob: this.o(o.ob), payout: this.pc(1 / (1 / o.oa + 1 / o.ob), 1),
+          active: on ? 'color-mix(in srgb, var(--color-accent) 9%, transparent)' : 'transparent',
+          color: on ? 'var(--color-accent)' : 'inherit'
+        };
+      });
+      return { title: f.a.name + ' vs ' + f.b.name, aName: f.a.name.split(' ')[0], bName: f.b.name.split(' ')[0], rows };
+    })();
+
+    const riskRows = decorated.filter(f => f.status === 'open' || f.status === 'live').map(f => {
+      const netA = f.o.tot - f.a.pool * f.o.oa, netB = f.o.tot - f.b.pool * f.o.ob;
+      const worst = Math.min(netA, netB), scale = Math.max(1, f.o.tot * 0.3);
+      return {
+        title: f.a.name.split(' ')[0] + ' / ' + f.b.name.split(' ')[0],
+        worst: this.sign(worst) + ' 両', color: worst >= 0 ? this.ok() : 'var(--color-neutral-300)',
+        pct: Math.min(100, Math.abs(worst) / scale * 100).toFixed(0),
+        barColor: worst >= 0 ? 'var(--color-accent)' : 'var(--color-neutral-500)',
+        note: 'si ' + f.a.name.split(' ')[0] + ' gagne ' + this.sign(netA) + ' · si ' + f.b.name.split(' ')[0] + ' gagne ' + this.sign(netB)
+      };
+    });
+
+    const slipF = this.fight(s.slip.fightId);
+    const slipO = slipF ? this.oddsOf(slipF, eng) : null;
+    const slipOdds = slipF ? (s.slip.side === 'a' ? slipO.oa : slipO.ob) : 0;
+    const stake = this.parse(s.slip.stake);
+    const tooBig = stake > eng.maxStake, noFunds = stake > s.balance, tooSmall = stake > 0 && stake < eng.minStake;
+    const settleF = s.settleId ? dec(this.fight(s.settleId)) : null;
+
+    const walletField = (key, label, ph) => ({ value: s.wallet[key], placeholder: ph, fieldLabel: label, onInput: e => this.setState({ wallet: { ...s.wallet, [key]: e.target.value } }) });
+
+    return {
+      isArena: s.view === 'arena', isFight: s.view === 'fight', isBets: s.view === 'bets',
+      isWallet: s.view === 'wallet', isBoard: s.view === 'board', isAdmin: s.view === 'admin',
+      showSlip: s.view === 'arena' || s.view === 'fight',
+      balanceStr: this.n(s.balance), lockedStr: this.n(locked), openCount: openBets.length,
+      goWallet: this.go('wallet'), goArena: this.go('arena'), goAdmin: this.go('admin'), goBets: this.go('bets'),
+      engine: { modeLabel },
+      navItems: nav.map(([v, label, icon]) => ({
+        label, icon, go: this.go(v),
+        color: s.view === v ? 'var(--color-accent)' : 'var(--color-text)',
+        bg: s.view === v ? 'color-mix(in srgb, var(--color-accent) 12%, transparent)' : 'transparent'
+      })),
+      marketStats: [
+        { label: 'Volume du jour', value: this.k(decorated.reduce((t, f) => t + f.o.tot, 0)) + ' 両', hint: '+18 % vs hier', hintColor: this.ok() },
+        { label: 'Marchés ouverts', value: String(decorated.filter(f => f.status === 'open').length), hint: '1 en direct · 1 suspendu', hintColor: this.muted() },
+        { label: 'Retour joueur', value: this.pc(1 - eng.margin / 100, 1), hint: 'marge maison ' + eng.margin + ' %', hintColor: this.muted() },
+        { label: 'Mode du moteur', value: modeLabel, hint: eng.mode === 'hybride' ? (100 - eng.poolWeight) + ' % modèle / ' + eng.poolWeight + ' % mises' : 'appliqué à tous les marchés', hintColor: this.muted() }
+      ],
+      hasLive: !!live,
+      live: live && {
+        ...live, roundLabel: 'Round ' + live.round, clock: this.clock(live.clock),
+        volume: live.volume, betCount: this.n(live.bets),
+        aMove: live.aMove, bMove: live.bMove,
+        pathA: this.path(live.hist, 0, 320, 96), pathB: this.path(live.hist, 1, 320, 96)
+      },
+      filters: [['all', 'Tous'], ['live', 'En direct'], ['open', 'Ouverts'], ['settled', 'Clos']].map(([id, label]) => ({
+        label, on: s.filter === id, set: () => this.setState({ filter: id }),
+        color: s.filter === id ? 'var(--color-accent)' : 'inherit',
+        ring: s.filter === id ? 'inset 0 0 0 1px var(--color-accent)' : 'none'
+      })),
+      rows,
+      detail: detail && {
+        ...detail,
+        bigPathA: this.path(detail.hist, 0, 760, 160), bigPathB: this.path(detail.hist, 1, 760, 160),
+        range: this.o(Math.min(...(detail.hist || [[1, 1]]).map(p => p[0]))) + ' – ' + this.o(Math.max(...(detail.hist || [[1, 1]]).map(p => p[0]))),
+        compare: [cmp('rating', 'ELO'), cmp('w', 'Victoires'), cmp('ko', 'Finitions'), cmp('fin', 'Taux de finition', '%'), cmp('form', 'Forme', '%')],
+        pipeline: [
+          { i: '1', label: 'Probabilité du modèle (ELO)', value: this.pc(detail.o.pStat) },
+          { i: '2', label: 'Répartition des mises encaissées', value: this.pc(detail.o.shareA) },
+          { i: '3', label: 'Pondération ' + modeLabel, value: this.pc(detail.o.p) },
+          { i: '4', label: 'Marge maison retirée', value: eng.margin + ' %' },
+          { i: '5', label: 'Cote publiée', value: this.o(detail.o.oa) + ' / ' + this.o(detail.o.ob) }
+        ],
+        mathNote: eng.mode === 'mutuel'
+          ? 'En pari mutuel, la cote suit uniquement la répartition des mises : la maison encaisse sa marge quel que soit le vainqueur, mais la cote peut beaucoup bouger avant le combat.'
+          : eng.mode === 'maker'
+            ? 'En market maker, la probabilité est fixée à la main dans la régie ; les mises ne déplacent plus la cote, donc la maison porte le risque.'
+            : 'En hybride, la cote part du modèle ELO puis se déplace vers la répartition des mises à hauteur de ' + eng.poolWeight + ' %. Les gros tickets bougent la cote, sans la laisser dériver loin du modèle.'
+      },
+      showMath: s.showMath, mathLabel: s.showMath ? 'Masquer le détail' : 'Voir le détail',
+      mathChevron: s.showMath ? 'ph-caret-up' : 'ph-caret-down',
+      toggleMath: () => this.setState({ showMath: !s.showMath }),
+      slip: {
+        badge: slipF ? this.statusOf(slipF).statusLabel : '—',
+        empty: !slipF, filled: !!slipF,
+        event: slipF ? slipF.event : '', pick: slipF ? slipF[s.slip.side].name : '',
+        matchup: slipF ? 'Vainqueur · ' + slipF.a.name + ' vs ' + slipF.b.name : '',
+        odds: slipF ? this.o(slipOdds) : '',
+        stake: s.slip.stake === 0 ? '' : this.n(this.parse(s.slip.stake)),
+        setStake: e => this.setState({ slip: { ...s.slip, stake: this.parse(e.target.value) } }),
+        chips: [10000, 25000, 100000, 'max'].map(v => ({
+          label: v === 'max' ? 'Max' : this.k(v),
+          set: () => this.setState({ slip: { ...s.slip, stake: v === 'max' ? Math.min(eng.maxStake, s.balance) : v } })
+        })),
+        stakeStr: this.n(stake), netStr: this.n(Math.max(0, stake * slipOdds - stake)), returnStr: this.n(stake * slipOdds),
+        place: () => this.place(),
+        disabled: !stake || tooBig || noFunds || tooSmall || (slipF && (slipF.status === 'held' || slipF.status === 'settled')),
+        cta: 'Placer ' + this.n(stake) + ' 両',
+        note: noFunds ? 'Solde insuffisant' : tooBig ? 'Plafond du marché : ' + this.n(eng.maxStake) + ' 両' : tooSmall ? 'Mise minimum ' + this.n(eng.minStake) + ' 両' : 'Cote verrouillée à la validation du ticket',
+        noteColor: noFunds || tooBig || tooSmall ? 'var(--color-neutral-300)' : this.muted()
+      },
+      openBets: openBets.map(b => {
+        const f = this.fight(b.fightId);
+        return { pick: f[b.side].name, stake: this.k(b.stake), odds: this.o(b.odds), ret: this.k(b.stake * b.odds) + ' 両' };
+      }),
+      noOpenBets: openBets.length === 0,
+      betStats: [
+        { label: 'Engagé', value: this.k(locked) + ' 両', hint: openBets.length + ' tickets ouverts', color: 'var(--color-text)' },
+        { label: 'Retour potentiel', value: this.k(potential) + ' 両', hint: 'si tout passe', color: this.ok() },
+        { label: 'Bilan réglé', value: this.sign(netSettled) + ' 両', hint: settledBets.length + ' tickets soldés', color: netSettled >= 0 ? this.ok() : 'var(--color-neutral-300)' },
+        { label: 'ROI', value: (stakedAll ? (netSettled / stakedAll * 100).toFixed(1).replace('.', ',') : '0,0') + ' %', hint: 'sur ' + this.k(stakedAll) + ' 両 misés', color: 'var(--color-text)' }
+      ],
+      betRows: s.bets.map(b => {
+        const f = this.fight(b.fightId);
+        const won = b.status === 'won', lost = b.status === 'lost';
+        return {
+          fight: f.a.name + ' vs ' + f.b.name, placed: b.placed + ' · ' + f.event.split('·').pop().trim(),
+          pick: f[b.side].name, odds: this.o(b.odds), stake: this.n(b.stake) + ' 両',
+          ret: lost ? '—' : this.n(b.stake * b.odds) + ' 両',
+          returnColor: won ? this.ok() : lost ? this.muted() : 'var(--color-text)',
+          status: won ? 'gagné' : lost ? 'perdu' : 'en cours',
+          tagBg: won ? 'var(--color-accent-800)' : lost ? 'var(--color-neutral-900)' : 'transparent',
+          tagColor: won ? 'var(--color-accent-100)' : lost ? 'var(--color-neutral-400)' : 'var(--color-accent)'
+        };
+      }),
+      walletStats: [
+        { label: 'Engagé', value: this.k(locked) + ' 両', color: 'var(--color-text)' },
+        { label: 'Bilan 30 j', value: this.sign(netSettled) + ' 両', color: netSettled >= 0 ? this.ok() : 'var(--color-neutral-300)' },
+        { label: 'Rang', value: '#7', color: 'var(--color-accent)' }
+      ],
+      walletActions: [
+        {
+          icon: 'ph ph-vault', title: 'Recharger', note: 'Virement depuis le coffre du village, crédité immédiatement.', cta: 'Créditer', ...walletField('deposit', 'Montant en ryos', '50 000'),
+          submit: () => { const v = this.parse(s.wallet.deposit); if (!v) return this.toast('Montant invalide'); this.setState({ balance: s.balance + v }); this.toast(this.n(v) + ' 両 crédités'); }
+        },
+        {
+          icon: 'ph ph-hand-coins', title: 'Retirer', note: 'Retour vers le coffre. Les ryos engagés restent bloqués.', cta: 'Retirer', ...walletField('withdraw', 'Montant en ryos', '0'),
+          submit: () => { const v = this.parse(s.wallet.withdraw); if (!v) return this.toast('Montant invalide'); if (v > s.balance) return this.toast('Solde insuffisant'); this.setState({ balance: s.balance - v }); this.toast(this.n(v) + ' 両 retirés'); }
+        },
+        {
+          icon: 'ph ph-arrows-left-right', title: 'Transférer', note: 'Envoi direct à un autre parieur, sans frais entre villages alliés.', cta: 'Envoyer', ...walletField('transfer', 'Montant · destinataire', '20 000 · Ayame'),
+          submit: () => { const v = this.parse(s.wallet.transfer); if (!v) return this.toast('Montant invalide'); if (v > s.balance) return this.toast('Solde insuffisant'); this.setState({ balance: s.balance - v }); this.toast(this.n(v) + ' 両 transférés'); }
+        }
+      ],
+      txRows: s.tx.map(t => ({
+        ...t, amount: this.sign(t.amount) + ' 両', after: this.n(t.after) + ' 両',
+        color: t.amount >= 0 ? this.ok() : 'var(--color-neutral-400)'
+      })),
+      podium: s.board.slice(0, 3).map((p, i) => ({
+        rank: '0' + p.rank, name: p.name, village: p.village, profit: this.sign(p.profit) + ' 両',
+        detail: p.bets + ' paris · ' + p.hit + ' % réussite · ROI ' + p.roi + ' %',
+        bg: i === 0 ? 'linear-gradient(150deg, var(--color-accent-900), var(--color-surface) 70%)' : 'var(--color-surface)'
+      })),
+      boardRows: s.board.map(r => ({
+        rank: String(r.rank).padStart(2, '0'), name: r.name, village: r.village, bets: this.n(r.bets),
+        hit: r.hit + ' %', roi: (r.roi > 0 ? '+' : '') + r.roi + ' %', profit: this.sign(r.profit) + ' 両',
+        color: r.profit >= 0 ? this.ok() : 'var(--color-neutral-400)',
+        you: r.you ? 'color-mix(in srgb, var(--color-accent) 8%, transparent)' : 'transparent'
+      })),
+      adminTabs: [['cards', 'Combats', 'ph ph-boxing-glove'], ['engine', 'Moteur & risque', 'ph ph-function'], ['accounts', 'Comptes', 'ph ph-users-three'], ['disputes', 'Litiges', 'ph ph-gavel']].map(([id, label, icon]) => ({
+        label, icon, on: s.adminTab === id, set: () => this.setState({ adminTab: id }),
+        color: s.adminTab === id ? 'var(--color-accent)' : 'inherit',
+        ring: s.adminTab === id ? 'inset 0 0 0 1px var(--color-accent)' : 'none'
+      })),
+      adminCards: s.adminTab === 'cards', adminEngine: s.adminTab === 'engine',
+      adminAccounts: s.adminTab === 'accounts', adminDisputes: s.adminTab === 'disputes',
+      villages: ['Feuille', 'Sable', 'Brume', 'Foudre', 'Pierre', 'Son'],
+      draft: (() => {
+        const d = s.draft;
+        const set = key => e => this.setState({ draft: { ...s.draft, [key]: e.target.value } });
+        const pv = 1 / (1 + Math.pow(10, (Number(d.ratingB) - Number(d.ratingA)) / 400));
+        const m = eng.margin / 100;
+        return {
+          ...d, setNameA: set('nameA'), setVillageA: set('villageA'), setRatingA: set('ratingA'),
+          setNameB: set('nameB'), setVillageB: set('villageB'), setRatingB: set('ratingB'),
+          setEvent: set('event'), setWhen: set('when'), setSeed: set('seed'),
+          preview: 'Cotes d\'ouverture estimées ' + this.o((1 / pv) * (1 - m)) + ' / ' + this.o((1 / (1 - pv)) * (1 - m)) + ' · p modèle ' + this.pc(pv),
+          create: () => {
+            const seed = this.parse(d.seed) || 100000;
+            if (!d.nameA.trim() || !d.nameB.trim()) return this.toast('Renseigne les deux combattants');
+            const mk = (name, village, rating, pool) => ({ name: name.trim(), village, rank: 'Jonin', rating: Number(rating) || 1500, pool, style: '—', w: 0, l: 0, ko: 0, fin: 50, form: 60 });
+            const f = {
+              id: 'f' + Date.now(), event: d.event, status: 'open', startsIn: d.when, manualP: 0.5,
+              a: mk(d.nameA, d.villageA, d.ratingA, Math.round(seed * pv)),
+              b: mk(d.nameB, d.villageB, d.ratingB, Math.round(seed * (1 - pv))),
+              hist: [], winner: null, bets: 0
+            };
+            f.hist = this.seedHist(f);
+            this.setState({ fights: [f, ...s.fights], draft: { ...d, nameA: '', nameB: '' } });
+            this.toast('Marché ouvert — ' + f.a.name + ' vs ' + f.b.name);
+          }
+        };
+      })(),
+      adminRows: decorated.map(f => {
+        const netA = f.o.tot - f.a.pool * f.o.oa, netB = f.o.tot - f.b.pool * f.o.ob, worst = Math.min(netA, netB);
+        return {
+          title: f.title, when: f.when, event: f.event.split('·').pop().trim(),
+          volume: this.k(f.o.tot) + ' 両', odds: f.aOdds + ' / ' + f.bOdds,
+          worst: this.sign(worst) + ' 両', worstColor: worst >= 0 ? this.ok() : 'var(--color-neutral-300)',
+          statusLabel: f.statusLabel, statusBg: f.statusBg, statusColor: f.statusColor,
+          settled: f.status === 'settled',
+          holdLabel: f.status === 'held' ? 'Reprendre' : 'Suspendre',
+          toggleHold: () => {
+            this.setState({ fights: s.fights.map(x => x.id !== f.id ? x : { ...x, status: x.status === 'held' ? 'open' : 'held', startsIn: x.status === 'held' ? 'dans 20 min' : 'suspendu' }) });
+            this.toast(f.status === 'held' ? 'Marché repris' : 'Marché suspendu — mises bloquées');
+          },
+          settle: () => this.setState({ settleId: f.id })
+        };
+      }),
+      engineModes: [
+        ['mutuel', 'Pari mutuel', 'La cote suit la répartition des mises. Marge garantie, cote volatile.'],
+        ['hybride', 'Hybride (recommandé)', 'Modèle ELO en base, déplacé par les mises encaissées.'],
+        ['maker', 'Market maker', 'Probabilité fixée à la main. Les mises ne déplacent plus la cote.']
+      ].map(([id, label, note]) => {
+        const on = eng.mode === id;
+        return {
+          label, note, on, set: () => this.setState({ engine: { ...eng, mode: id } }),
+          border: on ? 'var(--color-accent)' : 'var(--color-divider)',
+          bg: on ? 'color-mix(in srgb, var(--color-accent) 9%, transparent)' : 'transparent',
+          dotBorder: on ? 'var(--color-accent)' : 'var(--color-divider)',
+          dotFill: on ? 'var(--color-accent)' : 'transparent',
+          dotInner: on ? 'inset 0 0 0 4px var(--color-surface)' : 'none'
+        };
+      }),
+      engineSliders: [
+        { key: 'margin', label: 'Marge maison', min: 0, max: 15, step: 0.5, value: eng.margin, display: eng.margin + ' %', note: 'retour joueur ' + this.pc(1 - eng.margin / 100, 1), dim: 1 },
+        { key: 'poolWeight', label: 'Poids des mises dans la cote', min: 0, max: 100, step: 5, value: eng.poolWeight, display: eng.poolWeight + ' %', note: eng.mode === 'hybride' ? (100 - eng.poolWeight) + ' % du modèle ELO' : 'actif uniquement en mode hybride', dim: eng.mode === 'hybride' ? 1 : 0.45 },
+        { key: 'maxStake', label: 'Plafond par ticket', min: 25000, max: 1000000, step: 25000, value: eng.maxStake, display: this.k(eng.maxStake) + ' 両', note: 'refus automatique au-delà', dim: 1 },
+        { key: 'minStake', label: 'Mise minimum', min: 100, max: 20000, step: 100, value: eng.minStake, display: this.n(eng.minStake) + ' 両', note: 'filtre les tickets de bruit', dim: 1 }
+      ].map(sl => ({ ...sl, set: e => this.setState({ engine: { ...this.state.engine, [sl.key]: Number(e.target.value) } }) })),
+      sim, riskRows,
+      accountRows: s.accounts.map(u => ({
+        ...u, initials: u.name.split(' ').map(w => w[0]).join(''),
+        balance: this.n(u.balance) + ' 両', locked: this.n(u.locked) + ' 両',
+        tagBg: u.status === 'actif' ? 'transparent' : u.status === 'gelé' ? 'var(--color-neutral-800)' : 'var(--color-accent-800)',
+        tagColor: u.status === 'actif' ? 'var(--color-accent)' : u.status === 'gelé' ? 'var(--color-neutral-200)' : 'var(--color-accent-100)',
+        toggleLabel: u.status === 'gelé' ? 'Réactiver' : 'Geler',
+        credit: () => { this.setState({ accounts: s.accounts.map(x => x.id === u.id ? { ...x, balance: x.balance + 10000 } : x) }); this.toast('10 000 両 crédités à ' + u.name); },
+        debit: () => { this.setState({ accounts: s.accounts.map(x => x.id === u.id ? { ...x, balance: Math.max(0, x.balance - 10000) } : x) }); this.toast('10 000 両 débités de ' + u.name); },
+        toggle: () => { this.setState({ accounts: s.accounts.map(x => x.id === u.id ? { ...x, status: x.status === 'gelé' ? 'actif' : 'gelé' } : x) }); this.toast(u.name + (u.status === 'gelé' ? ' réactivé' : ' gelé')); }
+      })),
+      disputeRows: s.disputes.map(d => ({
+        ...d,
+        tagBg: d.done ? 'var(--color-neutral-900)' : d.state === 'ouvert' ? 'var(--color-accent-800)' : 'var(--color-neutral-800)',
+        tagColor: d.done ? 'var(--color-neutral-400)' : d.state === 'ouvert' ? 'var(--color-accent-100)' : 'var(--color-neutral-200)',
+        state: d.done ? 'traité' : d.state,
+        resolve: () => { this.setState({ disputes: s.disputes.map(x => x.id === d.id ? { ...x, done: true, state: 'traité' } : x) }); this.toast('Litige tranché — ' + d.primary.toLowerCase()); },
+        refund: () => { this.setState({ disputes: s.disputes.map(x => x.id === d.id ? { ...x, done: true, state: 'traité' } : x) }); this.toast('Tickets annulés et remboursés'); }
+      })),
+      settleOpen: !!settleF,
+      settle: settleF && {
+        title: settleF.title, aName: settleF.a.name, bName: settleF.b.name,
+        aOdds: settleF.aOdds, bOdds: settleF.bOdds,
+        note: 'Volume ' + settleF.volume + ' 両 · ' + this.n(settleF.bets) + ' tickets · marge encaissée ' + eng.margin + ' %',
+        winA: () => this.doSettle('a'), winB: () => this.doSettle('b'),
+        close: () => this.setState({ settleId: null })
+      },
+      hasToast: !!s.toast, toast: s.toast, toastIcon: 'ph ph-check-circle'
+    };
+  }
+}
+</script>
+</body>
+</html>
