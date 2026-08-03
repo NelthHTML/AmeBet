@@ -45,10 +45,6 @@
       </sc-for>
     </nav>
     <div style="display:flex;align-items:flex-end;gap:var(--space-3);flex:none">
-      <button type="button" onClick="{{ lastUndo.go }}" title="{{ lastUndo.title }}" style="display:flex;align-items:center;gap:7px;height:36px;padding:0 12px;border-radius:var(--radius-sm);cursor:pointer;font:inherit;font-size:13px;white-space:nowrap;background:transparent;border:1px solid {{ lastUndo.border }};color:{{ lastUndo.color }}" style-hover="background:color-mix(in srgb, var(--color-accent) 12%, transparent)">
-        <i class="ph ph-arrow-u-up-left" style="font-size:15px"></i>Annuler
-        <span style="font-size:11px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ lastUndo.note }}</span>
-      </button>
       <div class="field" style="margin:0;width:154px;position:relative">
         <label>Salle</label>
         <div style="display:flex;align-items:center;gap:5px">
@@ -1401,19 +1397,6 @@ class Component extends DCLogic {
         border: logWho === o.v ? 'var(--color-accent)' : 'var(--color-divider)',
         bg: logWho === o.v ? 'color-mix(in srgb, var(--color-accent) 12%, transparent)' : 'transparent'
       })),
-      lastUndo: (() => {
-        const l = logs.find(x => !x.undone);
-        return {
-          any: !!l,
-          title: l
-            ? 'Annuler : ' + (l.label || '—') + ' — ' + this.when(l.at) + (l.by ? ' par ' + l.by : '')
-            : 'Rien à annuler pour l’instant',
-          note: l ? (KINDS[l.kind] || l.kind) : 'rien à annuler',
-          color: l ? 'var(--color-accent)' : this.muted(),
-          border: l ? 'var(--color-accent)' : 'var(--color-divider)',
-          go: () => l ? this.undo(l) : this.toast('Rien à annuler pour l’instant')
-        };
-      })(),
       noLogs: logs.length === 0,
       noLogMatch: logs.length > 0 && shownLogs.length === 0,
       logRows: shownLogs.map(l => {
