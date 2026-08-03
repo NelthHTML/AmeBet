@@ -137,10 +137,11 @@ firebase deploy
 ## Fichiers
 
 ```
-index.html          redirection vers le carnet
-AmeBet.dc.html      l’application
+index.html          l’application — servie à la racine, pour que l’adresse
+                    partagée soit .../AmeBet/?salle=nom
+AmeBet.dc.html      redirection vers la racine, pour les liens déjà distribués
 amebet-store.js     couche de données — Firestore ou repli localStorage
-firebase-config.js  config web (placeholders par défaut)
+firebase-config.js  config web du projet amebet
 firestore.rules     règles d’accès
 support.js          runtime de rendu
 _ds/                design system Nocturne
