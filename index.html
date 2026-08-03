@@ -45,6 +45,10 @@
       </sc-for>
     </nav>
     <div style="display:flex;align-items:flex-end;gap:var(--space-3);flex:none">
+      <button type="button" onClick="{{ lastUndo.go }}" title="{{ lastUndo.title }}" style="display:flex;align-items:center;gap:7px;height:36px;padding:0 12px;border-radius:var(--radius-sm);cursor:pointer;font:inherit;font-size:13px;white-space:nowrap;background:transparent;border:1px solid {{ lastUndo.border }};color:{{ lastUndo.color }}" style-hover="background:color-mix(in srgb, var(--color-accent) 12%, transparent)">
+        <i class="ph ph-arrow-u-up-left" style="font-size:15px"></i>Annuler
+        <span style="font-size:11px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ lastUndo.note }}</span>
+      </button>
       <div class="field" style="margin:0;width:154px;position:relative">
         <label>Salle</label>
         <div style="display:flex;align-items:center;gap:5px">
@@ -614,7 +618,11 @@
       </button>
     </div>
 
-    <h3 style="font-size:17px;margin:0 0 var(--space-4)">Liste des spectateurs</h3>
+    <div style="display:flex;align-items:baseline;gap:var(--space-4);margin-bottom:var(--space-4)">
+      <h3 style="font-size:17px;margin:0">Liste des spectateurs</h3>
+      <span style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent);text-wrap:pretty">La clôture archive la liste au jour choisi, puis la remet à zéro pour la prochaine séance.</span>
+      <button type="button" class="btn btn-secondary" onClick="{{ openClose }}" style="margin-left:auto;flex:none"><i class="ph ph-archive" style="font-size:14px"></i>{{ closeLabel }}</button>
+    </div>
     <div style="display:grid;grid-template-columns:1.1fr 1fr 1.4fr auto;gap:var(--space-3);align-items:end;padding:var(--space-4);border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);margin-bottom:var(--space-6)">
       <div class="field" style="margin:0"><label>Nom du spectateur</label><input class="input" type="text" value="{{ sDraft.name }}" onChange="{{ sDraft.setName }}" onKeyDown="{{ sDraft.key }}" placeholder="Qui entre dans l'arène"></div>
       <div class="field" style="margin:0"><label>Forfait pris</label>
@@ -652,8 +660,88 @@
     <sc-if value="{{ noSpectators }}" hint-placeholder-val="{{ false }}">
       <div style="font-size:13px;margin-top:var(--space-3);color:color-mix(in srgb, var(--color-text) 55%, transparent)">Personne dans la liste. Ajoute le premier spectateur ci-dessus.</div>
     </sc-if>
+
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:var(--space-8);margin:var(--space-8) 0 var(--space-4)">
+      <div>
+        <h3 style="font-size:17px;margin:0 0 4px">Séances archivées</h3>
+        <p style="font-size:13px;margin:0;max-width:560px;color:color-mix(in srgb, var(--color-text) 55%, transparent);text-wrap:pretty">Chaque clôture garde les noms, les forfaits et les prix du moment : retarifer un forfait plus tard ne change pas une séance déjà archivée.</p>
+      </div>
+      <div style="display:flex;gap:var(--space-8);text-align:right;flex:none;white-space:nowrap">
+        <sc-for list="{{ archiveStats }}" as="as" hint-placeholder-count="3">
+          <div>
+            <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent);margin-bottom:4px">{{ as.label }}</div>
+            <div style="font-size:20px;font-weight:500;font-variant-numeric:tabular-nums;color:{{ as.color }}">{{ as.value }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:var(--space-3)">
+      <sc-for list="{{ sessionCards }}" as="x" hint-placeholder-count="2">
+        <section style="border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-sm);overflow:hidden">
+          <div style="display:flex;align-items:center;gap:var(--space-4);padding:var(--space-4) var(--space-6)">
+            <i class="ph ph-archive" style="flex:none;font-size:17px;color:var(--color-accent)"></i>
+            <div style="min-width:0">
+              <div style="font-size:15px;font-weight:500;text-transform:capitalize">{{ x.label }}</div>
+              <div style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ x.sub }}</div>
+            </div>
+            <div style="margin-left:auto;text-align:right;white-space:nowrap">
+              <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent);margin-bottom:3px">Recette</div>
+              <div style="font-size:18px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--color-accent-300)">{{ x.total }}</div>
+            </div>
+            <button type="button" class="btn btn-ghost" onClick="{{ x.toggle }}" style="flex:none;font-size:12px">{{ x.toggleLabel }}<i class="ph-bold {{ x.chevron }}" style="font-size:12px"></i></button>
+            <button type="button" onClick="{{ x.drop }}" title="Supprimer cette séance de l'archive" style="flex:none;border:0;background:transparent;color:color-mix(in srgb, var(--color-text) 55%, transparent);cursor:pointer;padding:2px;font-size:15px;line-height:1" style-hover="color:var(--color-accent)"><i class="ph ph-trash"></i></button>
+          </div>
+          <sc-if value="{{ x.open }}" hint-placeholder-val="{{ true }}">
+            <div style="padding:0 var(--space-6) var(--space-4);animation:kb-rise .18s ease">
+              <table class="table" style="font-size:13px">
+                <thead><tr><th style="width:26%">Spectateur</th><th style="width:24%">Forfait</th><th>Note</th><th style="width:110px;text-align:right">Prix</th><th style="width:120px">Inscrit par</th></tr></thead>
+                <tbody>
+                  <sc-for list="{{ x.rows }}" as="r" hint-placeholder-count="3">
+                    <tr>
+                      <td style="font-weight:500">{{ r.name }}</td>
+                      <td style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ r.plan }}</td>
+                      <td style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ r.note }}</td>
+                      <td style="text-align:right;font-variant-numeric:tabular-nums;color:{{ r.priceColor }}">{{ r.price }}</td>
+                      <td style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ r.by }}</td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+          </sc-if>
+        </section>
+      </sc-for>
+      <sc-if value="{{ noSessions }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:var(--space-8);border-radius:var(--radius-md);border:1px dashed var(--color-divider);text-align:center;font-size:13px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">Aucune séance archivée — clôture la liste en fin de soirée pour la ranger ici.</div>
+      </sc-if>
+    </div>
     </sc-if>
   </main>
+
+  <sc-if value="{{ closing }}" hint-placeholder-val="{{ false }}">
+    <div class="dialog-backdrop" style="z-index:80">
+      <div class="dialog" style="width:min(500px,100%)">
+        <div class="dialog-title">Quel jour cette séance a-t-elle eu lieu&nbsp;?</div>
+        <div class="dialog-body">La liste sera archivée à cette date puis remise à zéro. Actuellement&nbsp;: <b style="font-weight:500;color:var(--color-accent-300)">{{ closeSummary }}</b>.</div>
+        <div style="display:flex;flex-direction:column;gap:var(--space-2);max-height:274px;overflow:auto;margin-top:var(--space-2)">
+          <sc-for list="{{ closeDays }}" as="d" hint-placeholder-count="3">
+            <button type="button" onClick="{{ d.pick }}" style="display:flex;align-items:center;gap:var(--space-3);width:100%;text-align:left;padding:9px 11px;border-radius:var(--radius-sm);cursor:pointer;font:inherit;border:1px solid {{ d.border }};background:{{ d.bg }};color:{{ d.color }}" style-hover="border-color:var(--color-accent)">
+              <span style="flex:none;display:grid;place-items:center;width:15px;height:15px;border-radius:50%;border:1.5px solid {{ d.border }}"><span style="width:7px;height:7px;border-radius:50%;background:{{ d.dot }}"></span></span>
+              <span style="min-width:0">
+                <span style="display:block;font-size:14px;text-transform:capitalize">{{ d.label }}</span>
+                <span style="display:block;font-size:11.5px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ d.sub }}</span>
+              </span>
+            </button>
+          </sc-for>
+        </div>
+        <div class="dialog-actions">
+          <button type="button" class="btn btn-ghost" onClick="{{ cancelClose }}">Annuler</button>
+          <button type="button" class="btn btn-primary" onClick="{{ confirmClose }}"><i class="ph ph-archive" style="font-size:14px"></i>Archiver et vider</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
 
   <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
     <div style="position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:70;display:flex;align-items:center;gap:10px;padding:11px 18px;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-lg);animation:kb-rise .2s ease">
@@ -677,6 +765,7 @@ class Component extends DCLogic {
     status: { mode: 'boot', label: 'Ouverture…', detail: '' },
     draft: { a: '', b: '' },
     plans: null, spectators: [], sDraft: { name: '', planId: '', note: '' },
+    sessions: [], closing: false, closeDay: '', openSess: {},
     entries: {}, confirming: null, openDone: {}, toast: null,
     search: '', selBets: {}, selFights: {}, dayOpen: {},
     logs: [], logQuery: '', logWho: '',
@@ -713,7 +802,8 @@ class Component extends DCLogic {
             mode: this._dirty ? s.mode : (settings.mode || s.mode),
             fee: this._dirty ? s.fee : (settings.fee === undefined || settings.fee === null ? s.fee : settings.fee),
             plans: this._dirty ? s.plans : (settings.plans || s.plans),
-            spectators: this._dirty ? s.spectators : (settings.spectators || s.spectators)
+            spectators: this._dirty ? s.spectators : (settings.spectators || s.spectators),
+            sessions: this._dirty ? s.sessions : (settings.sessions || s.sessions)
           }));
         }
       });
@@ -794,8 +884,9 @@ class Component extends DCLogic {
   }
 
   /** Réglages partagés (mode de cote, taux par organisateur), écriture groupée. */
-  pushSettings(patch) {
+  pushSettings(patch, label) {
     if (this.locked()) return this.toast('Merci d\u2019entrer votre nom d\u2019organisateur');
+    if (label) this._label = label;
     const src = this._settings || {};
     if (!this._patch) this._before = {};
     Object.keys(patch).forEach(k => {
@@ -805,17 +896,23 @@ class Component extends DCLogic {
     this._patch = { ...(this._patch || {}), ...patch };
     clearTimeout(this._save);
     this._save = setTimeout(() => {
-      const out = this._patch, before = this._before;
-      this._patch = null; this._before = null; this._dirty = false;
+      const out = this._patch, before = this._before, label = this._label;
+      this._patch = null; this._before = null; this._label = null; this._dirty = false;
       if (!this.store) return;
       this.store.saveSettings(out).catch(() => {});
-      this.journal({ kind: 'settings', icon: 'ph-sliders-horizontal', label: this.settingLabel(out, before), scope: 'settings', ref: Object.keys(out).join(','), before, after: out });
+      this.journal({
+        kind: label ? 'session.close' : 'settings',
+        icon: label ? 'ph-archive' : 'ph-sliders-horizontal',
+        label: label || this.settingLabel(out, before),
+        scope: 'settings', ref: Object.keys(out).join(','), before, after: out
+      });
     }, 500);
   }
 
   settingFallback(k) {
     if (k === 'plans') return this.defaultPlans();
     if (k === 'spectators') return [];
+    if (k === 'sessions') return [];
     if (k === 'fee') return this.props.commission ?? 5;
     if (k === 'mode') return 'pot';
     return null;
@@ -826,6 +923,7 @@ class Component extends DCLogic {
     if ('mode' in out) bits.push('cotes : ' + (out.mode === 'fixe' ? 'cote fixe 2,00' : 'partage du pot'));
     if ('plans' in out) bits.push('forfaits (' + (out.plans || []).length + ')');
     if ('spectators' in out) bits.push('spectateurs (' + (out.spectators || []).length + ')');
+    if ('sessions' in out) bits.push('séances archivées (' + (out.sessions || []).length + ')');
     return 'Réglages — ' + (bits.join(' · ') || Object.keys(out).join(', '));
   }
 
@@ -841,6 +939,58 @@ class Component extends DCLogic {
   plansList() { return this.state.plans || this.defaultPlans(); }
   savePlans(plans) { if (this.locked()) return this.toast('Merci d\u2019entrer votre nom d\u2019organisateur'); this.setState({ plans }); this.pushSettings({ plans }); }
   saveSpectators(spectators) { if (this.locked()) return this.toast('Merci d\u2019entrer votre nom d\u2019organisateur'); this.setState({ spectators }); this.pushSettings({ spectators }); }
+  sessionsList() { return this.state.sessions || []; }
+
+  /** Jours proposés à la clôture : ceux où un combat existe, plus aujourd'hui. */
+  combatDays() {
+    const map = new Map();
+    (this.state.fights || []).forEach(f => {
+      const ms = f.settledMs || f.createdMs || 0, k = this.dayKey(ms);
+      const e = map.get(k);
+      if (!e) map.set(k, { key: k, ms, fights: 1 });
+      else { e.fights++; if (ms > e.ms) e.ms = ms; }
+    });
+    const today = this.dayKey(Date.now());
+    if (!map.has(today)) map.set(today, { key: today, ms: Date.now(), fights: 0 });
+    return [...map.values()].sort((x, y) => (x.key < y.key ? 1 : -1));
+  }
+
+  /** Archive la billetterie du jour choisi puis vide la liste. Les prix sont
+      figés dans l'archive : retarifer un forfait ensuite ne la change pas. */
+  closeSession(dayKey) {
+    if (this.locked()) return this.toast('Merci d\u2019entrer votre nom d\u2019organisateur');
+    const specs = this.state.spectators || [];
+    if (!specs.length) return this.toast('La liste des spectateurs est déjà vide');
+    const day = this.combatDays().find(d => d.key === dayKey);
+    if (!day) return this.toast('Choisis le jour de la séance');
+    const plans = this.plansList();
+    const rows = specs.map(sp => {
+      const p = plans.find(x => x.id === sp.planId);
+      return {
+        name: sp.name || '—', note: sp.note || '', at: sp.at || 0, by: sp.by || '',
+        plan: p ? p.name : '', price: Math.max(0, Number(p && p.price) || 0)
+      };
+    });
+    const session = {
+      id: 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+      dayKey: day.key, dayMs: day.ms, closedMs: Date.now(), by: this.who(),
+      total: rows.reduce((t, r) => t + r.price, 0), rows
+    };
+    const sessions = [session, ...this.sessionsList()].slice(0, 60);
+    this.setState({ sessions, spectators: [], closing: false, closeDay: '' });
+    this.pushSettings({ sessions, spectators: [] },
+      'Séance du ' + this.dayLabel(day.ms) + ' archivée — ' + rows.length
+      + (rows.length > 1 ? ' spectateurs · ' : ' spectateur · ') + this.n(session.total) + ' 両');
+    this.toast('Séance archivée — liste remise à zéro');
+  }
+
+  dropSession(id) {
+    if (this.locked()) return this.toast('Merci d\u2019entrer votre nom d\u2019organisateur');
+    const sessions = this.sessionsList().filter(x => x.id !== id);
+    this.setState({ sessions });
+    this.pushSettings({ sessions });
+    this.toast('Séance supprimée de l\u2019archive');
+  }
 
   /* -------------------------------------------------------------- calculs */
 
@@ -1013,6 +1163,7 @@ class Component extends DCLogic {
     const plans = this.plansList();
     const byId = Object.fromEntries(plans.map(p => [p.id, p]));
     const specs = s.spectators || [];
+    const sessions = s.sessions || [];
     const priceOf = sp => Math.max(0, Number(byId[sp.planId] && byId[sp.planId].price) || 0);
     const gate = specs.reduce((t, sp) => t + priceOf(sp), 0);
     const patchPlan = (id, key, value) => this.savePlans(plans.map(p => p.id === id ? { ...p, [key]: value } : p));
@@ -1080,12 +1231,14 @@ class Component extends DCLogic {
     const ICONS = {
       'fight.create': 'ph-plus-circle', 'fight.delete': 'ph-trash', 'fight.settle': 'ph-trophy',
       'fight.reopen': 'ph-arrow-counter-clockwise', 'bet.add': 'ph-coins', 'bet.remove': 'ph-x-circle',
-      'bet.paid': 'ph-hand-coins', 'bet.unpaid': 'ph-arrow-u-up-left', settings: 'ph-sliders-horizontal'
+      'bet.paid': 'ph-hand-coins', 'bet.unpaid': 'ph-arrow-u-up-left', settings: 'ph-sliders-horizontal',
+      'session.close': 'ph-archive'
     };
     const KINDS = {
       'fight.create': 'combat ouvert', 'fight.delete': 'combat supprimé', 'fight.settle': 'vainqueur validé',
       'fight.reopen': 'combat rouvert', 'bet.add': 'pari ajouté', 'bet.remove': 'pari retiré',
-      'bet.paid': 'argent rendu', 'bet.unpaid': 'paiement annulé', settings: 'réglages'
+      'bet.paid': 'argent rendu', 'bet.unpaid': 'paiement annulé', settings: 'réglages',
+      'session.close': 'séance archivée'
     };
     const shownLogs = logs.filter(l =>
       (!logWho || (l.by || '—') === logWho) &&
@@ -1248,6 +1401,19 @@ class Component extends DCLogic {
         border: logWho === o.v ? 'var(--color-accent)' : 'var(--color-divider)',
         bg: logWho === o.v ? 'color-mix(in srgb, var(--color-accent) 12%, transparent)' : 'transparent'
       })),
+      lastUndo: (() => {
+        const l = logs.find(x => !x.undone);
+        return {
+          any: !!l,
+          title: l
+            ? 'Annuler : ' + (l.label || '—') + ' — ' + this.when(l.at) + (l.by ? ' par ' + l.by : '')
+            : 'Rien à annuler pour l’instant',
+          note: l ? (KINDS[l.kind] || l.kind) : 'rien à annuler',
+          color: l ? 'var(--color-accent)' : this.muted(),
+          border: l ? 'var(--color-accent)' : 'var(--color-divider)',
+          go: () => l ? this.undo(l) : this.toast('Rien à annuler pour l’instant')
+        };
+      })(),
       noLogs: logs.length === 0,
       noLogMatch: logs.length > 0 && shownLogs.length === 0,
       logRows: shownLogs.map(l => {
@@ -1538,6 +1704,61 @@ class Component extends DCLogic {
         }
       })),
       noSpectators: specs.length === 0,
+
+      /* Clôture : on archive la billetterie du jour puis on vide la liste. */
+      closeReady: specs.length > 0,
+      closeLabel: specs.length
+        ? 'Clôturer la séance (' + specs.length + ')'
+        : 'Clôturer la séance',
+      openClose: () => {
+        if (!specs.length) return this.toast('La liste des spectateurs est déjà vide');
+        const days = this.combatDays();
+        this.setState({ closing: true, closeDay: days.length ? days[0].key : '' });
+      },
+      closing: s.closing,
+      cancelClose: () => this.setState({ closing: false }),
+      closeSummary: specs.length + (specs.length > 1 ? ' spectateurs' : ' spectateur') + ' · ' + this.n(gate) + ' 両',
+      closeDays: this.combatDays().map(d => {
+        const on = s.closeDay === d.key;
+        return {
+          label: this.dayLabel(d.ms),
+          sub: d.fights
+            ? d.fights + (d.fights > 1 ? ' combats ce jour-là' : ' combat ce jour-là')
+            : 'aucun combat enregistré ce jour',
+          pick: () => this.setState({ closeDay: d.key }),
+          border: on ? 'var(--color-accent)' : 'var(--color-divider)',
+          bg: on ? 'color-mix(in srgb, var(--color-accent) 10%, transparent)' : 'transparent',
+          color: on ? 'var(--color-accent)' : 'var(--color-text)',
+          dot: on ? 'var(--color-accent)' : 'transparent'
+        };
+      }),
+      confirmClose: () => this.closeSession(s.closeDay),
+
+      archiveStats: [
+        { label: 'Séances archivées', value: String(sessions.length), color: 'var(--color-text)' },
+        { label: 'Spectateurs cumulés', value: String(sessions.reduce((t, x) => t + (x.rows || []).length, 0)), color: 'var(--color-text)' },
+        { label: 'Recette archivée', value: this.n(sessions.reduce((t, x) => t + (x.total || 0), 0)) + ' 両', color: 'var(--color-accent-300)' }
+      ],
+      noSessions: sessions.length === 0,
+      sessionCards: sessions.map(x => {
+        const rows = x.rows || [], open = !!s.openSess[x.id];
+        return {
+          label: this.dayLabel(x.dayMs),
+          sub: rows.length + (rows.length > 1 ? ' spectateurs' : ' spectateur')
+            + ' · clôturée ' + this.when(x.closedMs) + (x.by ? ' par ' + x.by : ''),
+          total: this.n(x.total || 0) + ' 両',
+          open, toggleLabel: open ? 'Masquer' : 'Détail',
+          chevron: open ? 'ph-caret-up' : 'ph-caret-down',
+          toggle: () => this.setState(v => ({ openSess: { ...v.openSess, [x.id]: !open } })),
+          drop: () => this.dropSession(x.id),
+          rows: rows.map(r => ({
+            name: r.name, plan: r.plan || '— sans forfait —', note: r.note || '—',
+            price: r.price ? this.n(r.price) + ' 両' : '—',
+            priceColor: r.price ? 'var(--color-text)' : this.muted(),
+            by: r.by || '—'
+          }))
+        };
+      }),
 
       hasToast: !!s.toast, toast: s.toast
     };

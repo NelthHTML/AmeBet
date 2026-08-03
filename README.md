@@ -8,7 +8,7 @@ de chaque organisateur. Interface en français, thème Nocturne.
 - **Historique** — trois outils sur une page : recherche par parieur (tous ses paris + ce qu’il te reste à lui rendre), historique global, et journal par jour. Chaque gagnant se coche « rendu » quand l’argent est remis ; les cases se cumulent par combat ou par journée.
 - **Bilan** — net par parieur, et prises encaissées par organisateur.
 - **Journal** — qui a fait quoi : chaque écriture est signée du nom de l’organisateur, filtrable par personne ou par mot-clé, et **annulable** (l’état d’avant l’action est rétabli).
-- **Forfaits** — billetterie de l’arène : les forfaits proposés (créés et retarifés à tout moment) et la liste des spectateurs avec le forfait pris. Indépendant des paris.
+- **Forfaits** — billetterie de l’arène, indépendante des paris : les forfaits proposés (créés et retarifés à tout moment) et la liste des spectateurs. En fin de soirée, **Clôturer la séance** demande à quel jour de combat elle a eu lieu, archive la liste (noms, forfaits et prix figés) et remet le compteur à zéro pour la suivante.
 
 ## Comment ça marche
 
@@ -78,6 +78,8 @@ rooms/{salle}/logs/{actionId}      journal en ajout seul, 300 dernières actions
 rooms/{salle}/meta/settings
   mode            'pot' | 'fixe'
   fee             part de l’organisateur en %, partagée par toute la salle
+  sessions[]      séances de billetterie archivées (60 dernières)
+                  dayKey, dayMs, closedMs, by, total, rows[]
   plans[]         { id, name, price, perk }            forfaits de l’arène
   spectators[]    { id, name, planId, note, by, at }   billetterie, hors paris
 ```
@@ -95,6 +97,7 @@ du combat concerné (`updateBets`), puisque le drapeau vit sur le pari lui-même
 | Valider un vainqueur | `winner`, `settledMs` et taux figés sur chaque pari + journal |
 | Cocher « rendu » | `paidMs` / `paidBy` sur le pari, via `updateBets` + journal |
 | Part, cotes, forfaits, spectateurs | `meta/settings` en *merge*, groupé toutes les 0,5 s + journal |
+| Clôturer une séance | `sessions` + `spectators: []` dans le même *merge* — donc annulable d’un seul geste depuis le journal |
 | Annuler depuis le journal | réécrit l’état d’avant (`setFight` ou `saveSettings`) et marque la ligne `undone` |
 
 Les quatre écoutes temps réel (`fights`, `logs`, `meta/settings`, `rooms`) sont
