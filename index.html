@@ -277,13 +277,15 @@
           </div>
           <div style="display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;margin-bottom:var(--space-3)">
             <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 55%, transparent)">Participants</span>
-            <span style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ tour.draftCount }}</span>
+            <span style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ tour.draftCount }} · glisse la poignée pour réorganiser</span>
             <button type="button" class="btn btn-secondary" onClick="{{ tour.addSlot }}" style="margin-left:auto;font-size:12px"><i class="ph ph-plus" style="font-size:14px"></i>Ajouter un participant</button>
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:var(--space-3)">
             <sc-for list="{{ tour.slots }}" as="sl" hint-placeholder-count="4">
-              <div class="field" style="margin:0"><label>{{ sl.label }}</label>
-                <div style="display:flex;align-items:center;gap:5px">
+              <div class="field" style="margin:0" onDragOver="{{ sl.dragOver }}" onDrop="{{ sl.dragDrop }}">
+                <label>{{ sl.label }}</label>
+                <div style="display:flex;align-items:center;gap:5px;opacity:{{ sl.opacity }};box-shadow:{{ sl.line }};border-radius:var(--radius-sm)">
+                  <span draggable="{{ true }}" onDragStart="{{ sl.dragStart }}" onDragEnd="{{ sl.dragEnd }}" title="Glisser pour réorganiser" style="flex:none;display:grid;place-items:center;width:18px;height:36px;cursor:grab;color:color-mix(in srgb, var(--color-text) 40%, transparent)"><i class="ph ph-dots-six-vertical" style="font-size:15px"></i></span>
                   <input class="input" type="text" value="{{ sl.value }}" onChange="{{ sl.set }}" placeholder="{{ sl.placeholder }}" style="min-width:0">
                   <button type="button" onClick="{{ sl.remove }}" title="Retirer cette place" style="flex:none;display:grid;place-items:center;width:32px;height:36px;padding:0;border-radius:var(--radius-sm);cursor:pointer;border:1px solid var(--color-divider);background:transparent;color:color-mix(in srgb, var(--color-text) 55%, transparent)" style-hover="border-color:var(--color-accent);color:var(--color-accent)"><i class="ph ph-x" style="font-size:14px"></i></button>
                 </div>
@@ -313,7 +315,7 @@
           <div style="display:flex;align-items:center;gap:9px;margin-bottom:var(--space-4)">
             <i class="ph ph-tree-structure" style="font-size:18px;color:var(--color-accent)"></i>
             <h3 style="font-size:16px;margin:0">Tableau</h3>
-            <span style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">Clique un nom pour le qualifier au tour suivant · reclique pour effacer</span>
+            <span style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">Clique un nom pour le qualifier · reclique pour effacer · glisse un nom du premier tour sur un autre pour échanger leurs places</span>
           </div>
           <div style="display:flex;gap:var(--space-6);align-items:stretch;overflow-x:auto;padding-bottom:var(--space-2)">
             <sc-for list="{{ tour.rounds }}" as="rd" hint-placeholder-count="3">
@@ -325,7 +327,7 @@
                       <span style="flex:none;width:16px;text-align:right;font-size:10px;font-variant-numeric:tabular-nums;color:color-mix(in srgb, var(--color-text) 40%, transparent)">{{ m.num }}</span>
                       <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
                         <sc-for list="{{ m.slots }}" as="sl" hint-placeholder-count="2">
-                          <button type="button" onClick="{{ sl.pick }}" title="{{ sl.title }}" style="display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:var(--space-3);width:100%;text-align:left;padding:7px 10px;border:0;border-radius:var(--radius-sm);font:inherit;font-size:13px;font-weight:{{ sl.weight }};background:{{ sl.bg }};color:{{ sl.color }};cursor:{{ sl.cursor }}" style-hover="filter:brightness(1.35)">
+                          <button type="button" draggable="{{ sl.movable }}" onDragStart="{{ sl.dragStart }}" onDragOver="{{ sl.dragOver }}" onDrop="{{ sl.dragDrop }}" onDragEnd="{{ sl.dragEnd }}" onClick="{{ sl.pick }}" title="{{ sl.title }}" style="display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:var(--space-3);width:100%;text-align:left;padding:7px 10px;border:0;border-radius:var(--radius-sm);font:inherit;font-size:13px;font-weight:{{ sl.weight }};background:{{ sl.bg }};color:{{ sl.color }};cursor:{{ sl.cursor }};opacity:{{ sl.opacity }};box-shadow:{{ sl.ring }}" style-hover="filter:brightness(1.35)">
                             <span style="font-size:10px;font-variant-numeric:tabular-nums;width:12px;color:{{ sl.seedColor }}">{{ sl.seed }}</span>
                             <span style="min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ sl.name }}</span>
                           </button>
@@ -399,6 +401,7 @@
             <div style="display:flex;align-items:center;gap:9px;margin-bottom:var(--space-4)">
               <i class="ph ph-chart-bar" style="font-size:18px;color:var(--color-accent)"></i>
               <h3 style="font-size:16px;margin:0">Participants et cotes</h3>
+              <span style="margin-left:auto;font-size:11px;color:color-mix(in srgb, var(--color-text) 45%, transparent)">{{ tour.rosterHint }}</span>
             </div>
             <sc-if value="{{ tour.rosterOpen }}" hint-placeholder-val="{{ true }}">
               <div style="display:flex;align-items:center;gap:var(--space-2);margin-bottom:var(--space-3)">
@@ -411,8 +414,8 @@
               <thead><tr><th style="width:26px">#</th><th>Participant</th><th style="text-align:right">Misé</th><th style="text-align:right">Cote</th><th style="text-align:right">État</th><th style="width:26px"></th></tr></thead>
               <tbody>
                 <sc-for list="{{ tour.entrants }}" as="en" hint-placeholder-count="8">
-                  <tr>
-                    <td style="font-size:11px;font-variant-numeric:tabular-nums;color:color-mix(in srgb, var(--color-text) 45%, transparent)">{{ en.seed }}</td>
+                  <tr draggable="{{ en.draggable }}" onDragStart="{{ en.dragStart }}" onDragOver="{{ en.dragOver }}" onDrop="{{ en.dragDrop }}" onDragEnd="{{ en.dragEnd }}" style="cursor:{{ en.cursor }};opacity:{{ en.opacity }};box-shadow:{{ en.line }}">
+                    <td style="font-size:11px;font-variant-numeric:tabular-nums;color:color-mix(in srgb, var(--color-text) 45%, transparent)"><span style="display:flex;align-items:center;gap:3px"><i class="ph ph-dots-six-vertical" style="font-size:13px"></i>{{ en.seed }}</span></td>
                     <td style="color:{{ en.color }}"><span style="display:block;font-size:13px">{{ en.name }}</span><span style="display:block;font-size:10px;color:color-mix(in srgb, var(--color-text) 45%, transparent)">{{ en.bets }}</span></td>
                     <td style="text-align:right;font-variant-numeric:tabular-nums;font-size:13px">{{ en.staked }}</td>
                     <td style="text-align:right;font-variant-numeric:tabular-nums;font-size:15px;color:var(--color-accent)">{{ en.odds }}</td>
@@ -1043,6 +1046,8 @@ class Component extends DCLogic {
     rooms: [], roomsOpen: false,
     tournament: null, tournaments: [],
     tDraft: { name: '', format: 'elim', names: ['', '', '', ''] },
+    tDrag: { kind: '', from: -1, over: -1 },
+    tSwap: { id: '', over: '' },
     tRoster: '',
     tEntry: { name: '', amount: '', pick: '' },
     openTour: {}, tClosing: false
@@ -1400,6 +1405,78 @@ class Component extends DCLogic {
     if (this.locked()) return this.toast('Merci d\u2019entrer votre nom d\u2019organisateur');
     this.setState({ tournament: next });
     this.pushSettings({ tournament: next }, label, meta);
+  }
+
+  /** Échange deux combattants de place dans le tableau (glisser-déposer).
+      Seul le premier tour porte de vrais noms : les suivants se recalculent. */
+  swapEntrants(idA, idB) {
+    const t = this.state.tournament;
+    if (!t) return;
+    if (t.champion) return this.toast('Tournoi clos : rouvre-le pour réorganiser');
+    const list = (t.entrants || []).slice();
+    const i = list.findIndex(x => x.id === idA), j = list.findIndex(x => x.id === idB);
+    if (i < 0 || j < 0 || i === j) return;
+    const a = list[i], b = list[j];
+    list[i] = b; list[j] = a;
+    const entrants = list.map((e, k) => ({ ...e, seed: k + 1 }));
+    const had = Object.keys(t.results || {}).length > 0;
+    this.saveTour({ ...t, entrants, results: {} },
+      a.name + ' ↔ ' + b.name + ' échangés dans le tableau' + (had ? ' — résultats remis à zéro' : ''),
+      { kind: 'tour.entrant.swap', icon: 'ph-arrows-left-right' });
+  }
+
+  /** Glisser-déposer : même mécanique pour le brouillon et le tournoi ouvert.
+      L'ordre EST le tirage — déplacer un nom change donc les appariements. */
+  dragKit(kind, i) {
+    const d = this.state.tDrag || { kind: '', from: -1, over: -1 };
+    const active = d.kind === kind && d.from >= 0;
+    const set = next => this.setState({ tDrag: next });
+    return {
+      dragStart: e => {
+        try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(i)); } catch (_) {}
+        set({ kind, from: i, over: i });
+      },
+      dragOver: e => {
+        if (!active) return;
+        e.preventDefault();
+        try { e.dataTransfer.dropEffect = 'move'; } catch (_) {}
+        if (d.over !== i) set({ ...d, over: i });
+      },
+      dragDrop: e => {
+        e.preventDefault();
+        const from = d.from;
+        set({ kind: '', from: -1, over: -1 });
+        if (!active || from === i) return;
+        if (kind === 'draft') this.moveDraftSlot(from, i); else this.moveEntrant(from, i);
+      },
+      dragEnd: () => set({ kind: '', from: -1, over: -1 }),
+      dragged: active && d.from === i,
+      target: active && d.over === i && d.from !== i,
+      down: active && d.over === i && d.from < i
+    };
+  }
+
+  moveDraftSlot(from, to) {
+    const names = this.tDraftNames();
+    if (from < 0 || to < 0 || from >= names.length || to >= names.length || from === to) return;
+    const [moved] = names.splice(from, 1);
+    names.splice(to, 0, moved);
+    this.setDraftNames(names);
+  }
+
+  moveEntrant(from, to) {
+    const t = this.state.tournament;
+    if (!t) return;
+    if (t.champion) return this.toast('Tournoi clos : rouvre-le pour réorganiser');
+    const list = (t.entrants || []).slice();
+    if (from < 0 || to < 0 || from >= list.length || to >= list.length || from === to) return;
+    const [moved] = list.splice(from, 1);
+    list.splice(to, 0, moved);
+    const entrants = list.map((e, i) => ({ ...e, seed: i + 1 }));
+    const had = Object.keys(t.results || {}).length > 0;
+    this.saveTour({ ...t, entrants, results: {} },
+      moved.name + ' déplacé en place ' + (to + 1) + (had ? ' — tableau redéployé' : ''),
+      { kind: 'tour.entrant.move', icon: 'ph-arrows-down-up' });
   }
 
   tDraftNames() { return ((this.state.tDraft || {}).names || []).slice(); }
@@ -1865,16 +1942,22 @@ class Component extends DCLogic {
       addSlot: () => this.addDraftSlot(),
       draftName: s.tDraft.name,
       setDraftName: e => this.setState({ tDraft: { ...s.tDraft, name: e.target.value } }),
-      slots: tDraftNames.map((v, i) => ({
+      slots: tDraftNames.map((v, i) => {
+        const dk = this.dragKit('draft', i);
+        return {
         label: 'Place ' + (i + 1), seed: String(i + 1), value: v,
         placeholder: i === 0 ? 'Tête de série' : 'Nom du combattant',
         remove: () => this.removeDraftSlot(i),
+        dragStart: dk.dragStart, dragOver: dk.dragOver, dragDrop: dk.dragDrop, dragEnd: dk.dragEnd,
+        opacity: dk.dragged ? '.4' : '1',
+        line: dk.target ? (dk.down ? 'inset 0 -2px 0 var(--color-accent)' : 'inset 0 2px 0 var(--color-accent)') : 'none',
         set: e => {
           const names = this.tDraftNames();
           names[i] = e.target.value;
           this.setDraftNames(names);
         }
-      })),
+        };
+      }),
       create: () => this.openTournament(),
       draftNote: 'Ajoute autant de participants que tu veux : le tableau se déploie tout seul à la bonne taille, les places manquantes deviennent des exemptions. En toutes rondes, chacun affronte tout le monde et le grand gagnant est celui qui compte le plus de victoires.',
 
@@ -1896,15 +1979,46 @@ class Component extends DCLogic {
             const e = m[k], won = !!(m.w && e && m.w.id === e.id);
             const lost = !!(m.w && e && m.w.id !== e.id);
             const clickable = !!(e && !tSealed);
+            const sw = s.tSwap || { id: '', over: '' };
+            const movable = !!(e && !tSealed && r === 0);
+            const held = movable && sw.id === e.id;
+            const cible = movable && !!sw.id && sw.id !== e.id;
+            const survol = cible && sw.over === e.id;
             return {
               seed: e ? String(e.seed) : '·',
               name: e ? e.name : 'à déterminer',
-              title: e ? (won ? e.name + ' est qualifié — cliquer pour effacer' : 'Déclarer ' + e.name + ' qualifié') : 'En attente du tour précédent',
+              title: e
+                ? (won ? e.name + ' est qualifié — cliquer pour effacer'
+                       : (movable ? 'Déclarer ' + e.name + ' qualifié · glisser pour échanger de place'
+                                  : 'Déclarer ' + e.name + ' qualifié'))
+                : 'En attente du tour précédent',
               bg: won ? 'color-mix(in srgb, var(--color-accent) 14%, transparent)' : 'color-mix(in srgb, var(--color-text) 5%, transparent)',
               color: won ? 'var(--color-accent)' : lost ? this.muted() : e ? 'var(--color-text)' : this.muted(),
               weight: won ? '500' : '400',
               seedColor: won ? 'var(--color-accent)' : this.muted(),
-              cursor: clickable ? 'pointer' : 'default',
+              cursor: movable ? 'grab' : clickable ? 'pointer' : 'default',
+              movable,
+              opacity: held ? '.35' : '1',
+              ring: survol ? 'inset 0 0 0 2px var(--color-accent)'
+                : cible ? 'inset 0 0 0 1px var(--color-accent-700)' : 'none',
+              dragStart: ev => {
+                if (!movable) return;
+                try { ev.dataTransfer.effectAllowed = 'move'; ev.dataTransfer.setData('text/plain', e.id); } catch (_) {}
+                this.setState({ tSwap: { id: e.id, over: '' } });
+              },
+              dragOver: ev => {
+                if (!cible) return;
+                ev.preventDefault();
+                try { ev.dataTransfer.dropEffect = 'move'; } catch (_) {}
+                if (sw.over !== e.id) this.setState({ tSwap: { id: sw.id, over: e.id } });
+              },
+              dragDrop: ev => {
+                ev.preventDefault();
+                const from = sw.id;
+                this.setState({ tSwap: { id: '', over: '' } });
+                if (from && e && from !== e.id) this.swapEntrants(from, e.id);
+              },
+              dragEnd: () => this.setState({ tSwap: { id: '', over: '' } }),
               pick: () => { if (clickable) this.setMatch(m.id, e.id); else this.toast('Ce match attend le tour précédent'); }
             };
           })
@@ -1948,6 +2062,9 @@ class Component extends DCLogic {
           };
         })()
       },
+      rosterHint: tSealed
+        ? 'Tournoi clos — rouvre-le pour modifier les participants.'
+        : 'Glisse une ligne pour changer l’ordre du tirage : les appariements du tableau suivent.',
       rosterOpen: !tSealed,
       roster: {
         name: s.tRoster || '',
@@ -1955,7 +2072,8 @@ class Component extends DCLogic {
         key: e => { if (e.key === 'Enter') this.addEntrant(); },
         add: () => this.addEntrant()
       },
-      entrants: (T ? T.entrants : []).map(e => {
+      entrants: (T ? T.entrants : []).map((e, ei) => {
+        const dk = this.dragKit('roster', ei);
         const on = this.tOn(T, e.id), c = this.tOdds(T, e.id);
         const isChamp = !!(tChampE && tChampE.id === e.id);
         const bets = tBets.filter(b => b.pick === e.id).length;
@@ -1967,6 +2085,11 @@ class Component extends DCLogic {
           status: isChamp ? 'grand gagnant' : tElim[e.id] ? 'éliminé' : 'en course',
           tagClass: isChamp ? 'tag-accent' : tElim[e.id] ? 'tag-outline' : 'tag-neutral',
           color: isChamp ? 'var(--color-accent)' : tElim[e.id] ? this.muted() : 'var(--color-text)',
+          draggable: !tSealed,
+          cursor: tSealed ? 'default' : 'grab',
+          dragStart: dk.dragStart, dragOver: dk.dragOver, dragDrop: dk.dragDrop, dragEnd: dk.dragEnd,
+          opacity: dk.dragged ? '.4' : '1',
+          line: dk.target ? (dk.down ? 'inset 0 -2px 0 var(--color-accent)' : 'inset 0 2px 0 var(--color-accent)') : 'none',
           remove: () => this.removeEntrant(e)
         };
       }),
