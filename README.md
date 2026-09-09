@@ -8,6 +8,7 @@ de chaque organisateur. Interface en français, thème Nocturne.
 - **Historique** — trois outils sur une page : recherche par parieur (tous ses paris + ce qu’il te reste à lui rendre), historique global, et journal par jour. Chaque gagnant se coche « rendu » quand l’argent est remis ; les cases se cumulent par combat ou par journée.
 - **Bilan** — net par parieur, et prises encaissées par organisateur.
 - **Journal** — qui a fait quoi : chaque écriture est signée du nom de l’organisateur, filtrable par personne ou par mot-clé, et **annulable** (l’état d’avant l’action est rétabli).
+- **Tournoi** — un tableau à élimination directe ou en toutes rondes : on ajoute autant de participants qu’on veut, les paris portent **uniquement sur le grand gagnant**, et le tableau se recalcule dès qu’un vainqueur est saisi ou corrigé. À la fin, **Clôturer** archive le tournoi (vainqueur, mises, participants).
 - **Forfaits** — billetterie de l’arène, indépendante des paris : les forfaits proposés (créés et retarifés à tout moment) et la liste des spectateurs. En fin de soirée, **Clôturer la séance** demande à quel jour de combat elle a eu lieu, archive la liste (noms, forfaits et prix figés) et remet le compteur à zéro pour la suivante.
 
 ## Comment ça marche
@@ -82,7 +83,21 @@ rooms/{salle}/meta/settings
                   dayKey, dayMs, closedMs, by, total, rows[]
   plans[]         { id, name, price, perk }            forfaits de l’arène
   spectators[]    { id, name, planId, note, by, at }   billetterie, hors paris
+  tournament      tournoi en cours, ou null
+                  id, name, format ('elim' | 'poule'), size, createdMs, by,
+                  entrants[] { id, name, seed },
+                  results   { matchId: entrantId }  vainqueurs saisis,
+                  bets[]    { id, name, amount, pick, by, rate, at, paidMs, paidBy },
+                  champion
+  tournaments[]   tournois archivés (40 derniers)
+                  name, format, champion, createdMs, closedMs, by, entrants[], bets[]
 ```
+
+Le tournoi vit dans `meta/settings`, comme les autres réglages de salle : il est
+donc partagé en temps réel, journalisé et **annulable** depuis le journal, sans
+collection ni index supplémentaire. Le tableau n’est jamais stocké : il est
+recalculé à chaque rendu depuis `results`, donc corriger un vainqueur reprend
+tout seul les tours suivants.
 
 Les paris sont écrits en `arrayUnion` / `arrayRemove` : deux organisateurs peuvent
 saisir en même temps sans s’écraser. Cocher « rendu » réécrit le tableau `bets`
@@ -96,7 +111,7 @@ du combat concerné (`updateBets`), puisque le drapeau vit sur le pari lui-même
 | Ajouter / retirer un pari | `arrayUnion` / `arrayRemove` sur `bets` + journal |
 | Valider un vainqueur | `winner`, `settledMs` et taux figés sur chaque pari + journal |
 | Cocher « rendu » | `paidMs` / `paidBy` sur le pari, via `updateBets` + journal |
-| Part, cotes, forfaits, spectateurs | `meta/settings` en *merge*, groupé toutes les 0,5 s + journal |
+| Part, cotes, forfaits, spectateurs, tournoi | `meta/settings` en *merge*, groupé toutes les 0,5 s + journal |
 | Clôturer une séance | `sessions` + `spectators: []` dans le même *merge* — donc annulable d’un seul geste depuis le journal |
 | Annuler depuis le journal | réécrit l’état d’avant (`setFight` ou `saveSettings`) et marque la ligne `undone` |
 
@@ -130,24 +145,42 @@ Le fichier `.nojekyll` est indispensable : sans lui, GitHub Pages ignore `_ds/`
 
 ### Firebase Hosting (alternative)
 
+En local :
+
 ```bash
 npm i -g firebase-tools
 firebase login
-# renseigne ton projet dans .firebaserc
-firebase deploy
+# renseigne ton projet dans .firebaserc (ou laisse scripts/write-config.mjs le faire)
+firebase deploy --only hosting,firestore:rules,firestore:indexes
 ```
+
+En CI, le workflow `.github/workflows/firebase.yml` fait la même chose à chaque
+push sur `main`. Deux secrets à créer :
+
+| Secret | Contenu |
+|---|---|
+| `FIREBASE_CONFIG` | la config web en JSON — sert aussi à écrire `.firebaserc` |
+| `FIREBASE_SERVICE_ACCOUNT` | le JSON d’un compte de service (Console → Paramètres → *Comptes de service* → **Générer une nouvelle clé privée**) |
+
+Sans `FIREBASE_SERVICE_ACCOUNT`, le workflow se termine sans rien publier — les
+deux déploiements (Pages et Hosting) peuvent donc cohabiter sans se gêner.
+Pense à ajouter `<projet>.web.app` dans **Authentication → Settings → Domaines
+autorisés**.
 
 ## Fichiers
 
 ```
-index.html          l’application — servie à la racine, pour que l’adresse
-                    partagée soit .../AmeBet/?salle=nom
-AmeBet.dc.html      redirection vers la racine, pour les liens déjà distribués
+index.html          redirection vers le carnet
+AmeBet.dc.html      l’application
 amebet-store.js     couche de données — Firestore ou repli localStorage
-firebase-config.js  config web du projet amebet
+firebase-config.js  config web (placeholders par défaut)
+firebase.json       hosting + pointeurs règles/index
+.firebaserc         projet Firebase par défaut (réécrit en CI)
 firestore.rules     règles d’accès
+firestore.indexes.json  aucun index composite — volontairement vide
 support.js          runtime de rendu
 _ds/                design system Nocturne
 scripts/            génération de la config en CI
+.github/workflows/  deploy.yml (GitHub Pages) · firebase.yml (Hosting + règles)
 archive/            versions précédentes du carnet
 ```

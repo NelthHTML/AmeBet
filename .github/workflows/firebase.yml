@@ -1,0 +1,51 @@
+name: Déployer sur Firebase Hosting
+
+# Alternative à GitHub Pages : publie le site sur Firebase Hosting
+# et met à jour les règles Firestore dans le même geste.
+#
+# Secrets à créer (Settings → Secrets and variables → Actions) :
+#   FIREBASE_CONFIG          la config web en JSON (clés entre guillemets)
+#   FIREBASE_SERVICE_ACCOUNT le JSON d'un compte de service Firebase
+#                            (Console → Paramètres → Comptes de service
+#                             → Générer une nouvelle clé privée)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: firebase-hosting
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Injecter la config Firebase
+        env:
+          FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
+        run: node scripts/write-config.mjs
+
+      - name: Publier hosting + règles Firestore
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/sa.json
+          SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$SERVICE_ACCOUNT" ]; then
+            echo "FIREBASE_SERVICE_ACCOUNT absent — rien à publier."; exit 0
+          fi
+          printf '%s' "$SERVICE_ACCOUNT" > sa.json
+          npx --yes firebase-tools@13 deploy \
+            --only hosting,firestore:rules,firestore:indexes \
+            --non-interactive
+          rm -f sa.json

@@ -1,6 +1,0 @@
-# Fins de ligne normalisées dans le dépôt, quel que soit l'OS du contributeur.
-* text=auto eol=lf
-
-# Polices : binaires, jamais de conversion.
-*.woff2 binary
-*.woff  binary
