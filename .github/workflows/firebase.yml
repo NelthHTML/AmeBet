@@ -36,6 +36,9 @@ jobs:
           FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
         run: node scripts/write-config.mjs
 
+      - name: Le carnet devient la page d'accueil (URL propre)
+        run: node scripts/build-index.mjs
+
       - name: Publier hosting + règles Firestore
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/sa.json

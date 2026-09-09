@@ -5,7 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AmeBet — carnet de paris</title>
 <meta name="description" content="Carnet de paris sur combats : cotes, mises, parts d'organisateur et bilan.">
-<meta http-equiv="refresh" content="0; url=./AmeBet.dc.html">
+<script>
+  /* Repli hors CI : redirige en gardant ?salle=… et l'ancre.
+     En ligne, scripts/build-index.mjs remplace ce fichier par le carnet
+     lui-même, donc cette page ne s'affiche jamais. */
+  location.replace('./AmeBet.dc.html' + location.search + location.hash);
+</script>
 <style>
   html { color-scheme: dark; }
   body { margin: 0; min-height: 100vh; display: grid; place-items: center;
@@ -16,6 +21,5 @@
 </head>
 <body>
   <p>AME<span style="color:#9184d9">BET</span> — <a href="./AmeBet.dc.html">ouvrir le carnet</a></p>
-  <script>location.replace('./AmeBet.dc.html' + location.search + location.hash);</script>
 </body>
 </html>

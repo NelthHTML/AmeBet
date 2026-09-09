@@ -32,6 +32,9 @@ jobs:
           FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
         run: node scripts/write-config.mjs
 
+      - name: Le carnet devient la page d'accueil (URL propre)
+        run: node scripts/build-index.mjs
+
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3

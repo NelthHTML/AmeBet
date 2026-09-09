@@ -143,6 +143,12 @@ Puis, sur GitHub :
 Le fichier `.nojekyll` est indispensable : sans lui, GitHub Pages ignore `_ds/`
 (le design system) parce que le dossier commence par un underscore.
 
+> **URL** — à chaque déploiement, `scripts/build-index.mjs` recopie
+> `AmeBet.dc.html` dans `index.html`. L’adresse reste donc
+> `https://<toi>.github.io/AmeBet/?salle=principale` au lieu de finir par
+> `/AmeBet.dc.html`, et le paramètre `?salle=` n’est plus perdu par une
+> redirection. L’ancien lien `…/AmeBet.dc.html` continue de fonctionner.
+
 ### Firebase Hosting (alternative)
 
 En local :
@@ -170,8 +176,10 @@ autorisés**.
 ## Fichiers
 
 ```
-index.html          redirection vers le carnet
-AmeBet.dc.html      l’application
+index.html          page d’accueil — en ligne, c’est le carnet lui-même
+                    (scripts/build-index.mjs le génère à chaque déploiement,
+                     pour que l’URL reste .../AmeBet/?salle=…)
+AmeBet.dc.html      l’application (source)
 amebet-store.js     couche de données — Firestore ou repli localStorage
 firebase-config.js  config web (placeholders par défaut)
 firebase.json       hosting + pointeurs règles/index
@@ -180,7 +188,7 @@ firestore.rules     règles d’accès
 firestore.indexes.json  aucun index composite — volontairement vide
 support.js          runtime de rendu
 _ds/                design system Nocturne
-scripts/            génération de la config en CI
+scripts/           génération de la config + de la page d’accueil en CI
 .github/workflows/  deploy.yml (GitHub Pages) · firebase.yml (Hosting + règles)
 archive/            versions précédentes du carnet
 ```
